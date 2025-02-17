@@ -28,7 +28,7 @@ public class MainPageWebtoon {
     public String getUrl(CustomHttpClient client){
         Response r = client.mget("/site.php?id=1");
         if(r==null) return null;
-        if(r.code() == 302){
+        if(r.code() == 302 && r.header("Location") != null && r.header("Location").startsWith("https://manatoki")) {
             this.baseUrl = r.header("Location");
         }else
             return null;
