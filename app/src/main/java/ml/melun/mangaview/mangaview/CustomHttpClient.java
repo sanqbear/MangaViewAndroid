@@ -1,5 +1,6 @@
 package ml.melun.mangaview.mangaview;
 
+import java.net.MalformedURLException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.net.URL;
-import java.nio.charset.MalformedInputException;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -144,7 +144,7 @@ public class CustomHttpClient {
         try {
             URL urlObj = new URL(baseUrl + url);
             headers.put("Host", urlObj.getHost());
-        } catch (MalformedInputException e) {
+        } catch (MalformedURLException e) {
             // ignore
         }
 
