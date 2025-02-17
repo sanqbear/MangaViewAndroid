@@ -1,12 +1,13 @@
 package ml.melun.mangaview.mangaview;
 
-
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.net.URL;
+import java.nio.charset.MalformedInputException;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -29,10 +30,10 @@ public class CustomHttpClient {
     Map<String, String> cookies;
     public String agent = "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36";
 
-    public CustomHttpClient(){
+    public CustomHttpClient() {
         System.out.println("http client create");
         this.cookies = new HashMap<>();
-        if(android.os.Build.VERSION.SDK_INT < CODE_SCOPED_STORAGE) {
+        if (android.os.Build.VERSION.SDK_INT < CODE_SCOPED_STORAGE) {
             // Necessary because our servers don't have the right cipher suites.
             // https://github.com/square/okhttp/issues/4053
             List<CipherSuite> cipherSuites = new ArrayList<>(ConnectionSpec.MODERN_TLS.cipherSuites());
@@ -50,7 +51,7 @@ public class CustomHttpClient {
                     .connectTimeout(20, TimeUnit.SECONDS)
                     .readTimeout(20, TimeUnit.SECONDS)
                     .build();
-        }else {
+        } else {
             this.client = getUnsafeOkHttpClient()
                     .followRedirects(false)
                     .followSslRedirects(false)
@@ -59,102 +60,112 @@ public class CustomHttpClient {
                     .build();
         }
 
-        //this.cfc = new HashMap<>();
-        //this.client = new OkHttpClient.Builder().build();
+        // this.cfc = new HashMap<>();
+        // this.client = new OkHttpClient.Builder().build();
     }
 
-    public void setCookie(String k, String v){
+    public void setCookie(String k, String v) {
         cookies.put(k, v);
     }
-    public void resetCookie(){
+
+    public void resetCookie() {
         this.cookies = new HashMap<>();
     }
 
-
-
-    public String getCookie(String k){
+    public String getCookie(String k) {
         return cookies.get(k);
     }
 
-    public Response get(String url, Map<String, String> headers){
-//        System.out.println(url);
+    public Response get(String url, Map<String, String> headers) {
+        // System.out.println(url);
         Response response;
         try {
             Request.Builder builder = new Request.Builder()
                     .url(url)
                     .get();
-            if(headers !=null)
-                for(String k : headers.keySet()){
+            if (headers != null)
+                for (String k : headers.keySet()) {
                     builder.addHeader(k, headers.get(k));
                 }
 
             Request request = builder.build();
             response = this.client.newCall(request).execute();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
         return response;
     }
 
-    public Response mget(String url, Boolean doLogin){
+    public Response mget(String url, Boolean doLogin) {
         return mget(url, doLogin, new HashMap<>());
     }
-    public Response mget(String url){
-        return mget(url,true);
+
+    public Response mget(String url) {
+        return mget(url, true);
     }
 
-
-    public String getUrl(){
+    public String getUrl() {
         return p.getUrl();
     }
 
-
-    public Response mget(String url, Boolean doLogin, Map<String, String> customCookie){
-        if(customCookie==null)
+    public Response mget(String url, Boolean doLogin, Map<String, String> customCookie) {
+        if (customCookie == null)
             customCookie = new HashMap<>();
-//        if(doLogin && p.getLogin() != null && p.getLogin().cookie != null && p.getLogin().cookie.length()>0){
-//            customCookie.put("PHPSESSID", p.getLogin().cookie);
-//        }
+        // if(doLogin && p.getLogin() != null && p.getLogin().cookie != null &&
+        // p.getLogin().cookie.length()>0){
+        // customCookie.put("PHPSESSID", p.getLogin().cookie);
+        // }
+        String baseUrl = p.getUrl();
+        if (baseUrl != null && url != null && !baseUrl.endsWith("/") && !url.startsWith("/")) {
+            url = "/" + url;
+        }
+
         Map<String, String> cookie = new HashMap<>(this.cookies);
         cookie.putAll(customCookie);
 
-
-
         StringBuilder cbuilder = new StringBuilder();
-        for(String key : cookie.keySet()){
+        for (String key : cookie.keySet()) {
             cbuilder.append(key);
             cbuilder.append('=');
             cbuilder.append(cookie.get(key));
             cbuilder.append("; ");
         }
-        if(cbuilder.length()>2)
-            cbuilder.delete(cbuilder.length()-2,cbuilder.length());
+        if (cbuilder.length() > 2)
+            cbuilder.delete(cbuilder.length() - 2, cbuilder.length());
 
-        System.out.println("ppppcookie: "+cbuilder.toString());
+        System.out.println("ppppcookie: " + cbuilder.toString());
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Cookie", cbuilder.toString());
         headers.put("User-Agent", agent);
-        headers.put("Referer",p.getUrl());
+        headers.put("Referer", baseUrl);
 
-        return get(p.getUrl()+url, headers);
+        try {
+            URL urlObj = new URL(baseUrl + url);
+            headers.put("Host", urlObj.getHost());
+        }
+        catch(MalformedInputException e) {
+            // ignore
+        }
+
+        return get(baseUrl + url, headers);
     }
 
-    public Response post(String url, RequestBody body, Map<String,String> headers){
-        return post(url,body,headers,false);
+    public Response post(String url, RequestBody body, Map<String, String> headers) {
+        return post(url, body, headers, false);
     }
 
-    public Response post(String url, RequestBody body, Map<String,String> headers, boolean localCookies){
+    public Response post(String url, RequestBody body, Map<String, String> headers, boolean localCookies) {
 
         StringBuilder cs = new StringBuilder();
-        //get cookies from headers
-        if(headers.get("Cookie") != null)
+        // get cookies from headers
+        if (headers.get("Cookie") != null)
             cs.append(headers.get("Cookie"));
 
         // add local cookies
-        if(localCookies)
-            for(String key : this.cookies.keySet()){
+        if (localCookies)
+            for (String key : this.cookies.keySet()) {
                 cs.append(key).append('=').append(this.cookies.get(key)).append("; ");
             }
 
@@ -163,49 +174,49 @@ public class CustomHttpClient {
         Response response = null;
         try {
             Request.Builder builder = new Request.Builder()
-                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
+                    .addHeader("User-Agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
                     .url(url)
                     .post(body);
 
-            for(String key: headers.keySet()){
+            for (String key : headers.keySet()) {
                 builder.addHeader(key, headers.get(key));
             }
 
             Request request = builder.build();
             response = this.client.newCall(request).execute();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return response;
 
     }
 
-
-    public Response post(String url, RequestBody body){
-//        if(!isloaded){
-//            cloudflareDns.create();
-//            isloaded = true;
-//        }
+    public Response post(String url, RequestBody body) {
+        // if(!isloaded){
+        // cloudflareDns.create();
+        // isloaded = true;
+        // }
         return post(url, body, new HashMap<>());
     }
 
     /*
-    code source : https://gist.github.com/chalup/8706740
+     * code source : https://gist.github.com/chalup/8706740
      */
 
     private static OkHttpClient.Builder getUnsafeOkHttpClient() {
         try {
             // Create a trust manager that does not validate certificate chains
-            final TrustManager[] trustAllCerts = new TrustManager[]{
+            final TrustManager[] trustAllCerts = new TrustManager[] {
                     new X509TrustManager() {
                         @Override
                         public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
-                                                       String authType){
+                                String authType) {
                         }
 
                         @Override
                         public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
-                                                       String authType){
+                                String authType) {
                         }
 
                         @Override
