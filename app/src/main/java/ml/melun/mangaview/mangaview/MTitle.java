@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MTitle{
+public class MTitle {
     String name;
     int id;
     String thumb;
@@ -14,10 +14,13 @@ public class MTitle{
     String release;
     String path;
     int baseMode = base_comic; // default is comic
-    //public static final String[] releases = {"미분류","주간","격주","월간","격월/비정기","단편","단행본","완결"};
-    public MTitle(){
+    // public static final String[] releases =
+    // {"미분류","주간","격주","월간","격월/비정기","단편","단행본","완결"};
+
+    public MTitle() {
 
     }
+
     public MTitle(String name, int id, String thumb, String author, List<String> tags, String release, int baseMode) {
         this.name = name.replace("\"", "");
         this.id = id;
@@ -37,12 +40,12 @@ public class MTitle{
     }
 
     public int getBaseMode() {
-        if(baseMode == base_auto)
+        if (baseMode == base_auto)
             baseMode = base_comic;
         return baseMode;
     }
 
-    public String getBaseModeStr(){
+    public String getBaseModeStr() {
         return baseModeKorStr(baseMode);
     }
 
@@ -63,12 +66,14 @@ public class MTitle{
     }
 
     public String getAuthor() {
-        if(author == null) return "";
+        if (author == null)
+            return "";
         return author;
     }
 
-    public List<String> getTags(){
-        if(tags==null) return new ArrayList<>();
+    public List<String> getTags() {
+        if (tags == null)
+            return new ArrayList<>();
         return tags;
     }
 
@@ -109,8 +114,8 @@ public class MTitle{
     public static final int base_comic = 1;
     public static final int base_webtoon = 2;
 
-    public static String baseModeStr(int mode){
-        switch(mode){
+    public static String baseModeStr(int mode) {
+        switch (mode) {
             case base_comic:
                 return "comic";
             case base_webtoon:
@@ -119,8 +124,9 @@ public class MTitle{
                 return "comic";
         }
     }
-    public static String baseModeKorStr(int mode){
-        switch(mode){
+
+    public static String baseModeKorStr(int mode) {
+        switch (mode) {
             case base_comic:
                 return "만화";
             case base_webtoon:
@@ -133,11 +139,11 @@ public class MTitle{
     @NonNull
     @Override
     public String toString() {
-        return name + " . " + id + " . " +  thumb + " . " + author + " . " + baseMode;
+        return name + " . " + id + " . " + thumb + " . " + author + " . " + baseMode;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return ((MTitle)obj).getBaseMode() == this.baseMode && ((MTitle)obj).getId() == this.id ;
+        return ((MTitle) obj).getBaseMode() == this.baseMode && ((MTitle) obj).getId() == this.id;
     }
 }

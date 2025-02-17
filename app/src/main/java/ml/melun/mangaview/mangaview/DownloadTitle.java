@@ -5,7 +5,7 @@ import java.util.List;
 public class DownloadTitle extends MTitle {
     private List<Manga> eps;
 
-    public DownloadTitle(Title t){
+    public DownloadTitle(Title t) {
         super(t.getName(), t.getId(), t.getThumb(), t.getAuthor(), t.getTags(), t.getRelease(), t.getBaseMode());
         eps = t.getEps();
     }

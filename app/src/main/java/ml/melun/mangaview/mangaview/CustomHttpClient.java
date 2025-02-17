@@ -144,8 +144,7 @@ public class CustomHttpClient {
         try {
             URL urlObj = new URL(baseUrl + url);
             headers.put("Host", urlObj.getHost());
-        }
-        catch(MalformedInputException e) {
+        } catch (MalformedInputException e) {
             // ignore
         }
 

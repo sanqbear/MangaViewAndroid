@@ -1,4 +1,5 @@
 package ml.melun.mangaview.mangaview;
+
 import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,31 +15,32 @@ import okhttp3.Response;
 import static ml.melun.mangaview.mangaview.MTitle.baseModeStr;
 
 public class Search {
-    /* mode
-    * 0 : 제목
-    * 1 : 작가
-    * 2 : 태그
-    * 3 : 글자
-    * 4 : 발행
-    * 5 : null
-    * 6 : 종합
-    * 7 : (웹툰)제목
-    * 8 : (웹툰)작가
-    * 9 : (웹툰)태그
-    * 10 : (웹툰)글자
-    * 11 : (웹툰)발행
-    * 12 : (웹툰)null
-    * 13 : (웹툰)종합
+    /*
+     * mode
+     * 0 : 제목
+     * 1 : 작가
+     * 2 : 태그
+     * 3 : 글자
+     * 4 : 발행
+     * 5 : null
+     * 6 : 종합
+     * 7 : (웹툰)제목
+     * 8 : (웹툰)작가
+     * 9 : (웹툰)태그
+     * 10 : (웹툰)글자
+     * 11 : (웹툰)발행
+     * 12 : (웹툰)null
+     * 13 : (웹툰)종합
      */
 
     int baseMode;
+
     public Search(String q, int mode, int baseMode) {
         query = q;
         this.mode = mode;
         this.baseMode = baseMode;
-        //if(mode==6) query = "";
+        // if(mode==6) query = "";
     }
-
 
     public int getBaseMode() {
         return baseMode;
@@ -48,38 +50,38 @@ public class Search {
         return last;
     }
 
-
     public int fetch(CustomHttpClient client) {
         result = new ArrayList<>();
-        if(!last) {
+        if (!last) {
             try {
-                //검색결과 페이지당 210개
-                //stx=쿼리, page=0~
+                // 검색결과 페이지당 210개
+                // stx=쿼리, page=0~
                 String searchUrl = "";
-                switch(mode){
-                    //todo add more modes
+                switch (mode) {
+                    // todo add more modes
                     case 0:
-                        searchUrl = "?bo_table="+baseModeStr(baseMode)+"&stx=";
+                        searchUrl = "?bo_table=" + baseModeStr(baseMode) + "&stx=";
                         break;
                     case 1:
-                        searchUrl = "?bo_table="+baseModeStr(baseMode)+"&artist=";
+                        searchUrl = "?bo_table=" + baseModeStr(baseMode) + "&artist=";
                         break;
                     case 2:
-                        searchUrl = "?bo_table="+baseModeStr(baseMode)+"&tag=";
+                        searchUrl = "?bo_table=" + baseModeStr(baseMode) + "&tag=";
                         break;
                     case 3:
-                        searchUrl = "?bo_table="+baseModeStr(baseMode)+"&jaum=";
+                        searchUrl = "?bo_table=" + baseModeStr(baseMode) + "&jaum=";
                         break;
                     case 4:
-                        searchUrl = "?bo_table="+baseModeStr(baseMode)+"&publish=";
+                        searchUrl = "?bo_table=" + baseModeStr(baseMode) + "&publish=";
                         break;
                 }
 
-
-                Response response = client.mget('/'+baseModeStr(baseMode)+"/p" + page++ + searchUrl + URLEncoder.encode(query,"UTF-8"), true, null);
+                Response response = client.mget(
+                        '/' + baseModeStr(baseMode) + "/p" + page++ + searchUrl + URLEncoder.encode(query, "UTF-8"),
+                        true, null);
                 String body = response.body().string();
-                if(body.contains("Connect Error: Connection timed out")){
-                    //adblock : try again
+                if (body.contains("Connect Error: Connection timed out")) {
+                    // adblock : try again
                     response.close();
                     page--;
                     return fetch(client);
@@ -89,8 +91,8 @@ public class Search {
 
                 Elements titles = d.select("div.list-item");
 
-                if(response.code()>=400){
-                    //has error
+                if (response.code() >= 400) {
+                    // has error
                     return 1;
                 } else if (titles.size() < 1)
                     last = true;
@@ -101,7 +103,7 @@ public class Search {
                 String release;
                 int id;
 
-                for(Element e : titles) {
+                for (Element e : titles) {
                     try {
                         Element infos = e.selectFirst("div.img-item");
                         Element infos2 = infos.selectFirst("div.in-lable");
@@ -111,15 +113,19 @@ public class Search {
                         thumb = infos.selectFirst("img").attr("src");
 
                         Element ae = e.selectFirst("div.list-artist");
-                        if (ae != null) author = ae.selectFirst("a").ownText();
-                        else author = "";
+                        if (ae != null)
+                            author = ae.selectFirst("a").ownText();
+                        else
+                            author = "";
 
                         Element re = e.selectFirst("div.list-publish");
-                        if (re != null) release = re.selectFirst("a").ownText();
-                        else release = "";
+                        if (re != null)
+                            release = re.selectFirst("a").ownText();
+                        else
+                            release = "";
 
                         result.add(new Title(title, thumb, author, null, release, id, baseMode));
-                    }catch (Exception e2){
+                    } catch (Exception e2) {
                         e2.printStackTrace();
                     }
                 }
@@ -127,7 +133,7 @@ public class Search {
                 if (result.size() < 35)
                     last = true;
 
-                if(result.size()==0)
+                if (result.size() == 0)
                     page--;
 
             } catch (Exception e) {
@@ -139,8 +145,7 @@ public class Search {
         return 0;
     }
 
-
-    public ArrayList<Title> getResult(){
+    public ArrayList<Title> getResult() {
         return result;
     }
 

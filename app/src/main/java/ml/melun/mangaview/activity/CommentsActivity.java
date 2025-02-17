@@ -51,7 +51,8 @@ public class CommentsActivity extends AppCompatActivity {
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    if (p.getDarkTheme()) setTheme(R.style.AppThemeDarkNoTitle);
+    if (p.getDarkTheme())
+      setTheme(R.style.AppThemeDarkNoTitle);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_comments);
 
@@ -64,7 +65,8 @@ public class CommentsActivity extends AppCompatActivity {
     String gsonData = intent.getStringExtra("comments");
     if (gsonData.length() > 0) {
       Gson gson = new Gson();
-      comments = gson.fromJson(gsonData, new TypeToken<ArrayList<Comment>>() {}.getType());
+      comments = gson.fromJson(gsonData, new TypeToken<ArrayList<Comment>>() {
+      }.getType());
       adapter = new CommentsAdapter(context, comments);
       getSupportActionBar().setTitle("댓글 " + comments.size());
     } else {
@@ -74,15 +76,16 @@ public class CommentsActivity extends AppCompatActivity {
     gsonData = intent.getStringExtra("bestComments");
     if (gsonData.length() > 0) {
       Gson gson = new Gson();
-      bcomments = gson.fromJson(gsonData, new TypeToken<ArrayList<Comment>>() {}.getType());
+      bcomments = gson.fromJson(gsonData, new TypeToken<ArrayList<Comment>>() {
+      }.getType());
       badapter = new CommentsAdapter(context, bcomments);
-      // ((TextView)toolbar.findViewById(R.id.comments_title)).setText("댓글 ["+comments.size()+"]");
+      // ((TextView)toolbar.findViewById(R.id.comments_title)).setText("댓글
+      // ["+comments.size()+"]");
     }
 
     id = intent.getIntExtra("id", 0);
 
-    SectionsPagerAdapter mSectionsPagerAdapter =
-        new SectionsPagerAdapter(getSupportFragmentManager());
+    SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
     // Set up the ViewPager with the sections adapter.
     mViewPager = findViewById(R.id.container);
@@ -197,11 +200,13 @@ public class CommentsActivity extends AppCompatActivity {
 
     @Override
     protected Integer doInBackground(Void... voids) {
-      if (writeComment(httpClient, login, id, content, baseUrl)) return 0;
+      if (writeComment(httpClient, login, id, content, baseUrl))
+        return 0;
       else {
         // login again and try again
         // login.submit(httpClient);
-        if (writeComment(httpClient, login, id, content, baseUrl)) return 0;
+        if (writeComment(httpClient, login, id, content, baseUrl))
+          return 0;
       }
       return 1;
     }

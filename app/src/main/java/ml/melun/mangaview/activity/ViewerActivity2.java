@@ -72,7 +72,7 @@ import static ml.melun.mangaview.activity.CaptchaActivity.RESULT_CAPTCHA;
 import static ml.melun.mangaview.mangaview.Title.LOAD_CAPTCHA;
 
 public class ViewerActivity2 extends AppCompatActivity {
-    Boolean dark, toolbarshow=true, reverse, touch=true, stretch, leftRight;
+    Boolean dark, toolbarshow = true, reverse, touch = true, stretch, leftRight;
     Context context = this;
     String name;
     int id;
@@ -91,7 +91,7 @@ public class ViewerActivity2 extends AppCompatActivity {
     Title title;
     ImageView frame; // left
     ImageView frame2; // right
-    int type=-1;
+    int type = -1;
     Bitmap imgCache, preloadImg;
     Intent result;
     AlertDialog.Builder alert;
@@ -111,8 +111,10 @@ public class ViewerActivity2 extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(toolbarshow) getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        else getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+        if (toolbarshow)
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        else
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
 
     @Override
@@ -152,40 +154,40 @@ public class ViewerActivity2 extends AppCompatActivity {
         leftRight = p.getLeftRight();
         spinner = this.findViewById(R.id.toolbar_spinner);
         nextEpisode = this.findViewById(R.id.viewerNextEpisode);
-        if(p.getDoublepReverse()){
+        if (p.getDoublepReverse()) {
             frame = this.findViewById(R.id.viewer_image2);
             frame2 = this.findViewById(R.id.viewer_image);
-        }else{
+        } else {
             frame = this.findViewById(R.id.viewer_image);
             frame2 = this.findViewById(R.id.viewer_image2);
         }
 
-
-
         nextEpisode.setVisibility(View.GONE);
 
-        //initial padding setup
-        appbar.setPadding(0, getStatusBarHeight(),0,0);
+        // initial padding setup
+        appbar.setPadding(0, getStatusBarHeight(), 0, 0);
         getWindow().getDecorView().setBackgroundColor(Color.BLACK);
 
-//        Display display  = getWindowManager().getDefaultDisplay();
-//        Point size = new Point();
-//        display.getSize(size);
-//        split = size.x > size.y;
+        // Display display = getWindowManager().getDefaultDisplay();
+        // Point size = new Point();
+        // display.getSize(size);
+        // split = size.x > size.y;
 
         split = p.getDoublep();
 
-
         ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(), (view, windowInsetsCompat) -> {
-            //This is where you get DisplayCutoutCompat
+            // This is where you get DisplayCutoutCompat
             int statusBarHeight = getStatusBarHeight();
             int ci;
-            if(windowInsetsCompat.getDisplayCutout() == null) ci = 0;
-            else ci = windowInsetsCompat.getDisplayCutout().getSafeInsetTop();
+            if (windowInsetsCompat.getDisplayCutout() == null)
+                ci = 0;
+            else
+                ci = windowInsetsCompat.getDisplayCutout().getSafeInsetTop();
 
-            //System.out.println(ci + " : " + statusBarHeight);
-            appbar.setPadding(0,ci > statusBarHeight ? ci : statusBarHeight,0,0);
-            view.setPadding(windowInsetsCompat.getStableInsetLeft(),0,windowInsetsCompat.getStableInsetRight(),windowInsetsCompat.getStableInsetBottom());
+            // System.out.println(ci + " : " + statusBarHeight);
+            appbar.setPadding(0, ci > statusBarHeight ? ci : statusBarHeight, 0, 0);
+            view.setPadding(windowInsetsCompat.getStableInsetLeft(), 0, windowInsetsCompat.getStableInsetRight(),
+                    windowInsetsCompat.getStableInsetBottom());
             return windowInsetsCompat;
         });
 
@@ -201,11 +203,11 @@ public class ViewerActivity2 extends AppCompatActivity {
         });
         spinner.setAdapter(spinnerAdapter);
 
-        if(leftRight){
+        if (leftRight) {
             // button reverse
             nextPageBtn = this.findViewById(R.id.leftButton);
             prevPageBtn = this.findViewById(R.id.rightButton);
-        }else{
+        } else {
             nextPageBtn = this.findViewById(R.id.rightButton);
             prevPageBtn = this.findViewById(R.id.leftButton);
         }
@@ -217,17 +219,18 @@ public class ViewerActivity2 extends AppCompatActivity {
         commentBtn = this.findViewById(R.id.commentButton);
         stretch = p.getStretch();
 
-        //refreshBtn = this.findViewById(R.id.refreshButton);
-        if(stretch) frame.setScaleType(ImageView.ScaleType.FIT_XY);
+        // refreshBtn = this.findViewById(R.id.refreshButton);
+        if (stretch)
+            frame.setScaleType(ImageView.ScaleType.FIT_XY);
         swidth = getScreenSize(getWindowManager().getDefaultDisplay());
 
         intent = getIntent();
         title = new Gson().fromJson(intent.getStringExtra("title"), new TypeToken<Title>() {
         }.getType());
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             manga = new Gson().fromJson(intent.getStringExtra("manga"), new TypeToken<Manga>() {
             }.getType());
-        }else{
+        } else {
             manga = new Gson().fromJson(savedInstanceState.getString("manga"), new TypeToken<Manga>() {
             }.getType());
             dirty = true;
@@ -238,87 +241,91 @@ public class ViewerActivity2 extends AppCompatActivity {
 
         toolbarTitle.setText(name);
 
-//        refreshbtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                refreshImage();
-//            }
-//        });
+        // refreshbtn.setOnClickListener(new View.OnClickListener() {
+        // @Override
+        // public void onClick(View v) {
+        // refreshImage();
+        // }
+        // });
 
-
-        if(intent.getBooleanExtra("recent",false)){
+        if (intent.getBooleanExtra("recent", false)) {
             Intent resultIntent = new Intent();
-            setResult(RESULT_OK,resultIntent);
+            setResult(RESULT_OK, resultIntent);
         }
-        if(!manga.isOnline()) {
+        if (!manga.isOnline()) {
             reloadManga();
             commentBtn.setVisibility(View.GONE);
-        }else{
-            //if online
-            //fetch imgs
+        } else {
+            // if online
+            // fetch imgs
             loadImages l = new loadImages();
             l.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
         nextPageBtn.setOnClickListener(v -> {
-            if(touch) nextPage();
+            if (touch)
+                nextPage();
         });
         prevPageBtn.setOnClickListener(v -> {
-            if(touch) prevPage();
+            if (touch)
+                prevPage();
         });
 
         toolbar_toggleBtn.setOnClickListener(view -> toggleToolbar());
 
         touchToggleBtn.setOnClickListener(v -> {
-            if(touch) {
+            if (touch) {
                 touch = false;
                 touchToggleBtn.setBackgroundResource(R.drawable.button_bg_on);
-            }
-            else{
+            } else {
                 touch = true;
                 touchToggleBtn.setBackgroundResource(R.drawable.button_bg);
             }
         });
 
         pageBtn.setOnClickListener(v -> {
-            if(dark) alert = new AlertDialog.Builder(context,R.style.darkDialog);
-            else alert = new AlertDialog.Builder(context);
+            if (dark)
+                alert = new AlertDialog.Builder(context, R.style.darkDialog);
+            else
+                alert = new AlertDialog.Builder(context);
 
-            alert.setTitle("페이지 선택\n(1~"+imgs.size()+")");
+            alert.setTitle("페이지 선택\n(1~" + imgs.size() + ")");
             final EditText input = new EditText(context);
             input.setInputType(InputType.TYPE_CLASS_NUMBER);
             input.setRawInputType(Configuration.KEYBOARD_12KEY);
             alert.setView(input);
             alert.setPositiveButton("이동", (dialog, button) -> {
-                //이동 시
+                // 이동 시
                 if (input.getText().length() > 0) {
                     int page = Integer.parseInt(input.getText().toString());
-                    if (page < 1) page = 1;
-                    if (page > imgs.size()) page = imgs.size();
+                    if (page < 1)
+                        page = 1;
+                    if (page > imgs.size())
+                        page = imgs.size();
                     viewerBookmark = page - 1;
                     refreshImage();
                 }
             });
             alert.setNegativeButton("취소", (dialog, button) -> {
-                //취소 시
+                // 취소 시
             });
             alert.show();
         });
 
         next.setOnClickListener(v -> {
-            if(eps!=null && index>0) {
+            if (eps != null && index > 0) {
                 lockUi(true);
                 index--;
                 manga = eps.get(index);
                 id = manga.getId();
                 name = manga.getName();
                 loadManga(manga);
-            }else
+            } else
                 Toast.makeText(context, "마지막화 입니다", Toast.LENGTH_SHORT).show();
 
         });
         prev.setOnClickListener(v -> {
-            if(eps!=null && index<eps.size()-1) {
+            if (eps != null && index < eps.size() - 1) {
                 lockUi(true);
                 index++;
                 manga = eps.get(index);
@@ -329,7 +336,7 @@ public class ViewerActivity2 extends AppCompatActivity {
         });
 
         View.OnLongClickListener tbToggle = v -> {
-            //touched = true;
+            // touched = true;
             toggleToolbar();
             return true;
         };
@@ -338,7 +345,7 @@ public class ViewerActivity2 extends AppCompatActivity {
 
         commentBtn.setOnClickListener(v -> {
             Intent commentActivity = new Intent(context, CommentsActivity.class);
-            //create gson and put extra
+            // create gson and put extra
             Gson gson = new Gson();
             commentActivity.putExtra("comments", gson.toJson(manga.getComments()));
             commentActivity.putExtra("bestComments", gson.toJson(manga.getBestComments()));
@@ -348,61 +355,62 @@ public class ViewerActivity2 extends AppCompatActivity {
 
     }
 
-    void refreshPageControlButton(){
-        if(p.getPageControlButtonOffset()!= -1){
+    void refreshPageControlButton() {
+        if (p.getPageControlButtonOffset() != -1) {
             Button left = this.findViewById(R.id.leftButton);
             ViewGroup.LayoutParams params = left.getLayoutParams();
-            params.width = (int)(p.getPageControlButtonOffset() * Utils.getScreenWidth(getWindowManager().getDefaultDisplay()));
+            params.width = (int) (p.getPageControlButtonOffset()
+                    * Utils.getScreenWidth(getWindowManager().getDefaultDisplay()));
             left.setLayoutParams(params);
         }
     }
 
-
-    void nextPage(){
-        //refreshbtn.setVisibility(View.VISIBLE);
-        if(split) {
-            if(viewerBookmark+type-1 == imgs.size()-1){
-                if(nextEpisodeVisible) {
+    void nextPage() {
+        // refreshbtn.setVisibility(View.VISIBLE);
+        if (split) {
+            if (viewerBookmark + type - 1 == imgs.size() - 1) {
+                if (nextEpisodeVisible) {
                     next.performClick();
                 }
                 toggleNextEpisode();
-            }else {
+            } else {
                 viewerBookmark += type;
-                if(viewerBookmark < imgs.size()) {
+                if (viewerBookmark < imgs.size()) {
                     refreshImage();
                 }
             }
 
-
-        }else if(viewerBookmark==imgs.size()-1 && (type==-1 || type==1)){
-            //end of manga
-            //refreshbtn.setVisibility(View.INVISIBLE);
+        } else if (viewerBookmark == imgs.size() - 1 && (type == -1 || type == 1)) {
+            // end of manga
+            // refreshbtn.setVisibility(View.INVISIBLE);
             // 다음화 로드
-            if(nextEpisodeVisible) {
+            if (nextEpisodeVisible) {
                 next.performClick();
             }
             toggleNextEpisode();
 
-        }else if(type==0){
-            //is two page, current pos: right
-            //dont add page
-            //only change type
-            //refreshbtn.setVisibility(View.INVISIBLE);
+        } else if (type == 0) {
+            // is two page, current pos: right
+            // dont add page
+            // only change type
+            // refreshbtn.setVisibility(View.INVISIBLE);
             type = 1;
             int width = imgCache.getWidth();
             int height = imgCache.getHeight();
-            if(reverse) frame.setImageBitmap(Bitmap.createBitmap(imgCache, width/2, 0, width / 2, height));
-            else frame.setImageBitmap(Bitmap.createBitmap(imgCache, 0, 0, width / 2, height));
+            if (reverse)
+                frame.setImageBitmap(Bitmap.createBitmap(imgCache, width / 2, 0, width / 2, height));
+            else
+                frame.setImageBitmap(Bitmap.createBitmap(imgCache, 0, 0, width / 2, height));
 
-        }else{
-            //is single page OR unidentified
-            //add page
-            //has to check if twopage
+        } else {
+            // is single page OR unidentified
+            // add page
+            // has to check if twopage
             viewerBookmark++;
             try {
                 Object image = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark)) : imgs.get(viewerBookmark);
 
-                //placeholder
+                // placeholder
                 frame.setImageResource(R.drawable.placeholder);
                 Glide.with(context)
                         .asBitmap()
@@ -415,59 +423,64 @@ public class ViewerActivity2 extends AppCompatActivity {
 
                             @Override
                             public void onResourceReady(Bitmap bitmap,
-                                                        Transition<? super Bitmap> transition) {
-                                //refreshbtn.setVisibility(View.INVISIBLE);
+                                    Transition<? super Bitmap> transition) {
+                                // refreshbtn.setVisibility(View.INVISIBLE);
                                 bitmap = d.decode(bitmap, swidth);
                                 int width = bitmap.getWidth();
                                 int height = bitmap.getHeight();
-                                if(width>height){
+                                if (width > height) {
                                     imgCache = bitmap;
-                                    type=0;
-                                    if(reverse) frame.setImageBitmap(Bitmap.createBitmap(imgCache,0,0,width/2,height));
-                                    else frame.setImageBitmap(Bitmap.createBitmap(imgCache,width/2,0,width/2,height));
-                                }else{
-                                    type=-1;
+                                    type = 0;
+                                    if (reverse)
+                                        frame.setImageBitmap(Bitmap.createBitmap(imgCache, 0, 0, width / 2, height));
+                                    else
+                                        frame.setImageBitmap(
+                                                Bitmap.createBitmap(imgCache, width / 2, 0, width / 2, height));
+                                } else {
+                                    type = -1;
                                     frame.setImageBitmap(bitmap);
                                 }
                                 preload();
                             }
+
                             @Override
                             public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                if(imgs.size()>0) {
+                                if (imgs.size() > 0) {
                                     viewerBookmark--;
                                     nextPage();
                                 }
                             }
                         });
 
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 viewerBookmark--;
             }
         }
-        if(manga.useBookmark()) {
+        if (manga.useBookmark()) {
             p.setViewerBookmark(manga, viewerBookmark);
-            if (imgs.size() - 1 == viewerBookmark) p.removeViewerBookmark(manga);
+            if (imgs.size() - 1 == viewerBookmark)
+                p.removeViewerBookmark(manga);
         }
         updatePageIndex();
     }
 
-    void prevPage(){
-        //refreshbtn.setVisibility(View.VISIBLE);
-        if(nextEpisodeVisible){
+    void prevPage() {
+        // refreshbtn.setVisibility(View.VISIBLE);
+        if (nextEpisodeVisible) {
             toggleNextEpisode();
-        } else if(split){
-            //첫페이지가 아닐 경우
-            if(viewerBookmark>0){
+        } else if (split) {
+            // 첫페이지가 아닐 경우
+            if (viewerBookmark > 0) {
                 viewerBookmark--;
                 frame.setVisibility(View.GONE);
                 frame2.setVisibility(View.VISIBLE);
                 frame.setImageResource(R.drawable.placeholder);
                 frame2.setImageResource(R.drawable.placeholder);
-                //오른쪽 부터 로드
+                // 오른쪽 부터 로드
                 try {
                     Object image = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark)) : imgs.get(viewerBookmark);
-                    //placeholder
+                    // placeholder
                     Glide.with(context)
                             .asBitmap()
                             .load(image)
@@ -483,24 +496,26 @@ public class ViewerActivity2 extends AppCompatActivity {
                                     int width = bitmap.getWidth();
                                     int height = bitmap.getHeight();
                                     frame2.setImageBitmap(bitmap);
-                                    type=1;
+                                    type = 1;
                                     if (width < height) {
-                                        //portrait
+                                        // portrait
                                         type = 1;
-                                        if(viewerBookmark > 0){
-                                            //이전 페이지 로드하고 landscape 인지 확인, portrait일 경우에만 보여주기
-                                            Object image2 = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark-1)) : imgs.get(viewerBookmark-1);
+                                        if (viewerBookmark > 0) {
+                                            // 이전 페이지 로드하고 landscape 인지 확인, portrait일 경우에만 보여주기
+                                            Object image2 = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark - 1))
+                                                    : imgs.get(viewerBookmark - 1);
                                             Glide.with(context)
                                                     .asBitmap()
                                                     .load(image2)
                                                     .into(new CustomTarget<Bitmap>() {
                                                         @Override
-                                                        public void onResourceReady(@NonNull Bitmap bitmap1, @Nullable Transition<? super Bitmap> transition) {
+                                                        public void onResourceReady(@NonNull Bitmap bitmap1,
+                                                                @Nullable Transition<? super Bitmap> transition) {
                                                             bitmap1 = d.decode(bitmap1, swidth);
                                                             int width = bitmap1.getWidth();
                                                             int height = bitmap1.getHeight();
-                                                            if(width<height){
-                                                                //second is portrait
+                                                            if (width < height) {
+                                                                // second is portrait
                                                                 type = 2;
                                                                 frame.setVisibility(View.VISIBLE);
                                                                 frame.setImageBitmap(bitmap1);
@@ -518,39 +533,42 @@ public class ViewerActivity2 extends AppCompatActivity {
                                     }
                                     preload();
                                 }
+
                                 @Override
                                 public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                    if(imgs.size()>0) {
+                                    if (imgs.size() > 0) {
                                         refreshImage();
                                     }
                                 }
                             });
-                }catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     Utils.showCaptchaPopup(manga.getUrl(), context, e, p);
                 }
-                //일단 왼쪽거 냅두다가, 오른쪽이 landscape일 경우, GONE 처리
+                // 일단 왼쪽거 냅두다가, 오른쪽이 landscape일 경우, GONE 처리
             }
-        } else if(viewerBookmark==0 && (type==-1 || type==0)){
-            //start of manga
-            //refreshbtn.setVisibility(View.INVISIBLE);
-        } else if(type==1){
-            //is two page, current pos: left
-            //refreshbtn.setVisibility(View.INVISIBLE);
+        } else if (viewerBookmark == 0 && (type == -1 || type == 0)) {
+            // start of manga
+            // refreshbtn.setVisibility(View.INVISIBLE);
+        } else if (type == 1) {
+            // is two page, current pos: left
+            // refreshbtn.setVisibility(View.INVISIBLE);
             type = 0;
             int width = imgCache.getWidth();
             int height = imgCache.getHeight();
-            if(reverse) frame.setImageBitmap(Bitmap.createBitmap(imgCache, 0, 0, width / 2, height));
-            else frame.setImageBitmap(Bitmap.createBitmap(imgCache, width/2, 0, width / 2, height));
-        }else{
-            //is single page OR unidentified
-            //decrease page
-            //has to check if twopage
+            if (reverse)
+                frame.setImageBitmap(Bitmap.createBitmap(imgCache, 0, 0, width / 2, height));
+            else
+                frame.setImageBitmap(Bitmap.createBitmap(imgCache, width / 2, 0, width / 2, height));
+        } else {
+            // is single page OR unidentified
+            // decrease page
+            // has to check if twopage
             viewerBookmark--;
             try {
                 Object image = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark)) : imgs.get(viewerBookmark);
 
-                //placeholder
+                // placeholder
                 frame.setImageResource(R.drawable.placeholder);
                 Glide.with(context)
                         .asBitmap()
@@ -559,16 +577,19 @@ public class ViewerActivity2 extends AppCompatActivity {
                             @Override
                             public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
                                 bitmap = d.decode(bitmap, swidth);
-                                //refreshbtn.setVisibility(View.INVISIBLE);
+                                // refreshbtn.setVisibility(View.INVISIBLE);
                                 int width = bitmap.getWidth();
                                 int height = bitmap.getHeight();
-                                if(width>height){
+                                if (width > height) {
                                     imgCache = bitmap;
-                                    type=1;
-                                    if(reverse) frame.setImageBitmap(Bitmap.createBitmap(imgCache, width/2, 0, width / 2, height));
-                                    else frame.setImageBitmap(Bitmap.createBitmap(imgCache,0,0,width/2,height));
-                                }else{
-                                    type=-1;
+                                    type = 1;
+                                    if (reverse)
+                                        frame.setImageBitmap(
+                                                Bitmap.createBitmap(imgCache, width / 2, 0, width / 2, height));
+                                    else
+                                        frame.setImageBitmap(Bitmap.createBitmap(imgCache, 0, 0, width / 2, height));
+                                } else {
+                                    type = -1;
                                     frame.setImageBitmap(bitmap);
                                 }
                             }
@@ -580,37 +601,37 @@ public class ViewerActivity2 extends AppCompatActivity {
 
                             @Override
                             public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                                if(imgs.size()>0) {
+                                if (imgs.size() > 0) {
                                     viewerBookmark++;
                                     prevPage();
                                 }
                             }
                         });
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 viewerBookmark++;
             }
         }
-        if(manga.useBookmark()) {
+        if (manga.useBookmark()) {
             p.setViewerBookmark(manga, viewerBookmark);
-            if (0 == viewerBookmark) p.removeViewerBookmark(manga);
+            if (0 == viewerBookmark)
+                p.removeViewerBookmark(manga);
         }
         updatePageIndex();
 
     }
 
-
-
-    void refreshImage(){
+    void refreshImage() {
         frame.setVisibility(View.VISIBLE);
         frame2.setVisibility(View.GONE);
         frame.setImageResource(R.drawable.placeholder);
-        if(split) frame2.setImageResource(R.drawable.placeholder);
-        //refreshbtn.setVisibility(View.VISIBLE);
+        if (split)
+            frame2.setImageResource(R.drawable.placeholder);
+        // refreshbtn.setVisibility(View.VISIBLE);
         try {
             Object image = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark)) : imgs.get(viewerBookmark);
-            //placeholder
-            //frame.setImageResource(R.drawable.placeholder);
+            // placeholder
+            // frame.setImageResource(R.drawable.placeholder);
             Glide.with(context)
                     .asBitmap()
                     .load(image)
@@ -622,13 +643,13 @@ public class ViewerActivity2 extends AppCompatActivity {
 
                         @Override
                         public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
-                            //refreshbtn.setVisibility(View.INVISIBLE);
+                            // refreshbtn.setVisibility(View.INVISIBLE);
                             bitmap = d.decode(bitmap, swidth);
                             int width = bitmap.getWidth();
                             int height = bitmap.getHeight();
                             if (width > height) {
-                                if(split){
-                                    //split일경우 자를 필요 없음, frame2만 없애주기
+                                if (split) {
+                                    // split일경우 자를 필요 없음, frame2만 없애주기
                                     type = 1;
                                     frame2.setVisibility(View.GONE);
                                     frame.setImageBitmap(bitmap);
@@ -638,26 +659,29 @@ public class ViewerActivity2 extends AppCompatActivity {
                                     if (reverse) {
                                         frame.setImageBitmap(Bitmap.createBitmap(imgCache, 0, 0, width / 2, height));
                                     } else {
-                                        frame.setImageBitmap(Bitmap.createBitmap(imgCache, width / 2, 0, width / 2, height));
+                                        frame.setImageBitmap(
+                                                Bitmap.createBitmap(imgCache, width / 2, 0, width / 2, height));
                                     }
                                 }
 
                             } else {
                                 type = -1;
                                 frame.setImageBitmap(bitmap);
-                                if(split){
+                                if (split) {
                                     frame2.setVisibility(View.GONE);
                                     type = 1;
-                                    if(viewerBookmark+1 < imgs.size()) {
-                                        //다음 페이지 로드하고 landscape 인지 확인, portrait일 경우에만 보여주기
-                                        Object image2 = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark + 1)) : imgs.get(viewerBookmark + 1);
+                                    if (viewerBookmark + 1 < imgs.size()) {
+                                        // 다음 페이지 로드하고 landscape 인지 확인, portrait일 경우에만 보여주기
+                                        Object image2 = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark + 1))
+                                                : imgs.get(viewerBookmark + 1);
                                         frame2.setImageResource(R.drawable.placeholder);
                                         Glide.with(context)
                                                 .asBitmap()
                                                 .load(image2)
                                                 .into(new CustomTarget<Bitmap>() {
                                                     @Override
-                                                    public void onResourceReady(@NonNull Bitmap bitmap1, @Nullable Transition<? super Bitmap> transition) {
+                                                    public void onResourceReady(@NonNull Bitmap bitmap1,
+                                                            @Nullable Transition<? super Bitmap> transition) {
                                                         bitmap1 = d.decode(bitmap1, swidth);
                                                         int width = bitmap1.getWidth();
                                                         int height = bitmap1.getHeight();
@@ -678,28 +702,30 @@ public class ViewerActivity2 extends AppCompatActivity {
                             }
                             preload();
                         }
+
                         @Override
                         public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                            if(imgs.size()>0) {
+                            if (imgs.size() > 0) {
                                 refreshImage();
                             }
                         }
                     });
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             Utils.showCaptchaPopup(manga.getUrl(), context, e, p);
         }
     }
 
-    void preload(){
-        if(viewerBookmark<imgs.size()-1) {
-            Object image = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark+1)) : imgs.get(viewerBookmark+1);
+    void preload() {
+        if (viewerBookmark < imgs.size() - 1) {
+            Object image = manga.isOnline() ? getGlideUrl(imgs.get(viewerBookmark + 1)) : imgs.get(viewerBookmark + 1);
             Glide.with(context)
                     .asBitmap()
                     .load(image)
                     .addListener(new RequestListener<Bitmap>() {
                         @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target,
+                                boolean isFirstResource) {
                             if (imgs.size() > 0) {
                                 preload();
                             }
@@ -707,82 +733,85 @@ public class ViewerActivity2 extends AppCompatActivity {
                         }
 
                         @Override
-                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target,
+                                DataSource dataSource, boolean isFirstResource) {
                             return false;
                         }
                     })
                     .preload();
         }
     }
-    void updatePageIndex(){
-        pageBtn.setText(viewerBookmark+1+"/"+imgs.size());
-        boolean lastPage = viewerBookmark == imgs.size()-1;
+
+    void updatePageIndex() {
+        pageBtn.setText(viewerBookmark + 1 + "/" + imgs.size());
+        boolean lastPage = viewerBookmark == imgs.size() - 1;
         boolean firstPage = viewerBookmark == 0;
-        if(toolbarshow && !lastPage)
+        if (toolbarshow && !lastPage)
             toggleToolbar();
-        else if(lastPage && !toolbarshow)
+        else if (lastPage && !toolbarshow)
             toggleToolbar();
     }
 
-    void toggleNextEpisode(){
-        if(nextEpisodeVisible) {
+    void toggleNextEpisode() {
+        if (nextEpisodeVisible) {
             nextEpisodeVisible = false;
             nextEpisode.setVisibility(View.GONE);
-        }else{
+        } else {
             nextEpisodeVisible = true;
             nextEpisode.setVisibility(View.VISIBLE);
         }
     }
 
-    public void toggleToolbar(){
-        //attrs = getWindow().getAttributes();
-        if(toolbarshow){
-            //hide toolbar
+    public void toggleToolbar() {
+        // attrs = getWindow().getAttributes();
+        if (toolbarshow) {
+            // hide toolbar
             appbar.animate().translationY(-appbar.getHeight());
             appbarBottom.animate().translationY(+appbarBottom.getHeight());
-            toolbarshow=false;
-            //toolbar_toggleBtn.setVisibility(View.VISIBLE);
+            toolbarshow = false;
+            // toolbar_toggleBtn.setVisibility(View.VISIBLE);
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
-        }
-        else {
-            //show toolbar
+        } else {
+            // show toolbar
             appbar.animate().translationY(0);
             appbarBottom.animate().translationY(0);
-            toolbarshow=true;
-            //toolbar_toggleBtn.setVisibility(View.GONE);
+            toolbarshow = true;
+            // toolbar_toggleBtn.setVisibility(View.GONE);
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         }
-        //getWindow().setAttributes(attrs);
+        // getWindow().setAttributes(attrs);
     }
-
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         int keyCode = event.getKeyCode();
-        if (keyCode == p.getNextPageKey() ) {
-            if(event.getAction() == KeyEvent.ACTION_UP)
+        if (keyCode == p.getNextPageKey()) {
+            if (event.getAction() == KeyEvent.ACTION_UP)
                 nextPage();
             return true;
-        } else if(keyCode == p.getPrevPageKey()) {
-            if(event.getAction() == KeyEvent.ACTION_UP)
+        } else if (keyCode == p.getPrevPageKey()) {
+            if (event.getAction() == KeyEvent.ACTION_UP)
                 prevPage();
             return true;
         }
         return super.dispatchKeyEvent(event);
     }
 
-    private class loadImages extends AsyncTask<Void,String,Integer> {
+    private class loadImages extends AsyncTask<Void, String, Integer> {
         protected void onProgressUpdate(String... values) {
             pd.setMessage(values[0]);
         }
+
         protected void onPreExecute() {
             super.onPreExecute();
-            if(dark) pd = new ProgressDialog(context, R.style.darkDialog);
-            else pd = new ProgressDialog(context);
+            if (dark)
+                pd = new ProgressDialog(context, R.style.darkDialog);
+            else
+                pd = new ProgressDialog(context);
             pd.setMessage("로드중");
             pd.setCancelable(false);
             pd.setOnKeyListener((dialog, keyCode, event) -> {
-                if(keyCode == KeyEvent.KEYCODE_BACK){
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
                     loadImages.super.cancel(true);
                     pd.dismiss();
                     finish();
@@ -796,15 +825,15 @@ public class ViewerActivity2 extends AppCompatActivity {
             manga.setListener(msg -> publishProgress(msg));
             Login login = p.getLogin();
             Map<String, String> cookie = new HashMap<>();
-            if(login !=null) {
+            if (login != null) {
                 String php = p.getLogin().getCookie();
                 login.buildCookie(cookie);
-                cookie.put("last_wr_id",String.valueOf(id));
-                cookie.put("last_percent",String.valueOf(1));
-                cookie.put("last_page",String.valueOf(0));
+                cookie.put("last_wr_id", String.valueOf(id));
+                cookie.put("last_percent", String.valueOf(1));
+                cookie.put("last_page", String.valueOf(0));
             }
             int res = manga.fetch(httpClient);
-            if(title == null)
+            if (title == null)
                 title = manga.getTitle();
             return res;
         }
@@ -813,16 +842,16 @@ public class ViewerActivity2 extends AppCompatActivity {
         protected void onPostExecute(Integer res) {
             super.onPostExecute(res);
 
-            if(res == LOAD_CAPTCHA) {
-                //캡차 처리 팝업
+            if (res == LOAD_CAPTCHA) {
+                // 캡차 처리 팝업
                 showTokiCaptchaPopup(context, p);
                 return;
             }
 
             reloadManga();
 
-            //show info overlay
-            if(!dirty) {
+            // show info overlay
+            if (!dirty) {
                 dirty = true;
                 info.setVisibility(View.VISIBLE);
                 info.setAlpha(1f);
@@ -837,18 +866,17 @@ public class ViewerActivity2 extends AppCompatActivity {
                         });
             }
 
-
             if (pd.isShowing()) {
                 pd.dismiss();
             }
         }
     }
 
-    public void reloadManga(){
-        try{
+    public void reloadManga() {
+        try {
             lockUi(false);
             imgs = manga.getImgs(context);
-            if(imgs == null || imgs.size()==0) {
+            if (imgs == null || imgs.size() == 0) {
                 showCaptchaPopup(manga.getUrl(), context, p);
                 return;
             }
@@ -857,29 +885,29 @@ public class ViewerActivity2 extends AppCompatActivity {
             refreshToolbar();
             updateIntent();
             refreshImage();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void bookmarkRefresh(){
-        if(manga.useBookmark()) {
+    public void bookmarkRefresh() {
+        if (manga.useBookmark()) {
             viewerBookmark = p.getViewerBookmark(manga);
             // if manga is online or has title.gson
             p.addRecent(title);
             p.setBookmark(title, id);
-        }else
+        } else
             viewerBookmark = 0;
     }
 
-    public void updateIntent(){
+    public void updateIntent() {
         result = new Intent();
         result.putExtra("id", id);
         setResult(RESULT_OK, result);
     }
 
-    public void loadManga(Manga m){
-        if(m!=null) {
+    public void loadManga(Manga m) {
+        if (m != null) {
             manga = m;
             id = manga.getId();
             if (m.isOnline())
@@ -889,24 +917,24 @@ public class ViewerActivity2 extends AppCompatActivity {
         }
     }
 
-    public void refresh(){
+    public void refresh() {
         captchaChecked = false;
         loadImages l = new loadImages();
         l.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void refreshToolbar(){
+    public void refreshToolbar() {
         eps = manga.getEps();
-        if(eps == null || eps.size() == 0){
+        if (eps == null || eps.size() == 0) {
             eps = title.getEps();
         }
-        for(int i=0; i<eps.size(); i++){
-            if(eps.get(i).equals(manga)){
+        for (int i = 0; i < eps.size(); i++) {
+            if (eps.get(i).equals(manga)) {
                 index = i;
                 break;
             }
         }
-        //refresh spinner
+        // refresh spinner
         spinnerAdapter.setData(eps, manga);
         spinner.setSelection(manga);
 
@@ -916,24 +944,22 @@ public class ViewerActivity2 extends AppCompatActivity {
         toolbarTitle.setSingleLine(true);
         toolbarTitle.setSelected(true);
 
-        if(index==0){
+        if (index == 0) {
             next.setEnabled(false);
             next.setColorFilter(Color.BLACK);
-        }
-        else {
+        } else {
             next.setEnabled(true);
             next.setColorFilter(null);
         }
-        if(index==eps.size()-1) {
+        if (index == eps.size() - 1) {
             prev.setEnabled(false);
             prev.setColorFilter(Color.BLACK);
-        }
-        else {
+        } else {
             prev.setEnabled(true);
             prev.setColorFilter(null);
         }
 
-        pageBtn.setText(viewerBookmark+1+"/"+imgs.size());
+        pageBtn.setText(viewerBookmark + 1 + "/" + imgs.size());
     }
 
     @Override
@@ -944,22 +970,23 @@ public class ViewerActivity2 extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        //window orientation change
-//        Display display  = getWindowManager().getDefaultDisplay();
-//        Point size = new Point();
-//        display.getSize(size);
-//        if(imgs != null && viewerBookmark < imgs.size() && (split != size.x > size.y)) {
-//            //needs update
-//            split = size.x > size.y;
-//            refreshImage();
-//        }
-//        refreshPageControlButton();
-//    }
+    // @Override
+    // public void onConfigurationChanged(Configuration newConfig) {
+    // super.onConfigurationChanged(newConfig);
+    // //window orientation change
+    // Display display = getWindowManager().getDefaultDisplay();
+    // Point size = new Point();
+    // display.getSize(size);
+    // if(imgs != null && viewerBookmark < imgs.size() && (split != size.x >
+    // size.y)) {
+    // //needs update
+    // split = size.x > size.y;
+    // refreshImage();
+    // }
+    // refreshPageControlButton();
+    // }
 
-    void lockUi(Boolean lock){
+    void lockUi(Boolean lock) {
         toolbar_toggleBtn.setEnabled(!lock);
         commentBtn.setEnabled(!lock);
         next.setEnabled(!lock);
@@ -970,6 +997,5 @@ public class ViewerActivity2 extends AppCompatActivity {
         prevPageBtn.setEnabled(!lock);
         spinner.setEnabled(!lock);
     }
-
 
 }

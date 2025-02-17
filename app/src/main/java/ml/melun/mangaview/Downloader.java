@@ -21,7 +21,6 @@ import androidx.documentfile.provider.DocumentFile;
 
 import android.widget.Toast;
 
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -58,8 +57,8 @@ public class Downloader extends Service {
     ArrayList<DownloadTitle> titles;
     ArrayList<JSONArray> selected;
     float progress = 0;
-    int maxProgress=1000;
-    String notiTitle="";
+    int maxProgress = 1000;
+    String notiTitle = "";
     public static boolean running = false;
     public static boolean updateDownloading = false;
     NotificationCompat.Builder notification;
@@ -80,7 +79,7 @@ public class Downloader extends Service {
     Map<String, String> cookies;
     int failures = 0;
 
-    public static boolean isRunning(){
+    public static boolean isRunning() {
         return updateDownloading || running;
     }
 
@@ -88,16 +87,20 @@ public class Downloader extends Service {
     public void onCreate() {
         super.onCreate();
         serviceContext = this;
-        if(titles==null) titles = new ArrayList<>();
-        if(selected==null) selected = new ArrayList<>();
-        homeDir = serviceContext.getSharedPreferences("mangaView",Context.MODE_PRIVATE).getString("homeDir", "");
-        baseUrl = serviceContext.getSharedPreferences("mangaView",Context.MODE_PRIVATE).getString("url", "");
-        if(dt==null) dt = new downloadTitle();
-        //android O bullshit
+        if (titles == null)
+            titles = new ArrayList<>();
+        if (selected == null)
+            selected = new ArrayList<>();
+        homeDir = serviceContext.getSharedPreferences("mangaView", Context.MODE_PRIVATE).getString("homeDir", "");
+        baseUrl = serviceContext.getSharedPreferences("mangaView", Context.MODE_PRIVATE).getString("url", "");
+        if (dt == null)
+            dt = new downloadTitle();
+        // android O bullshit
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26) {
-            //notificationManager.deleteNotificationChannel("mangaView");
-            NotificationChannel mchannel = new NotificationChannel(channeld, "MangaView", NotificationManager.IMPORTANCE_LOW);
+            // notificationManager.deleteNotificationChannel("mangaView");
+            NotificationChannel mchannel = new NotificationChannel(channeld, "MangaView",
+                    NotificationManager.IMPORTANCE_LOW);
             mchannel.setDescription("다운로드 상태");
             mchannel.enableLights(true);
             mchannel.setLightColor(Color.MAGENTA);
@@ -116,15 +119,18 @@ public class Downloader extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent!=null) {
+        if (intent != null) {
             switch (intent.getAction()) {
                 case ACTION_START:
                     break;
                 case ACTION_QUEUE:
                     startNotification();
-                    if (dt == null) dt = new downloadTitle();
+                    if (dt == null)
+                        dt = new downloadTitle();
                     try {
-                        DownloadTitle target = new Gson().fromJson(intent.getStringExtra("title"), new TypeToken<DownloadTitle>() {}.getType());
+                        DownloadTitle target = new Gson().fromJson(intent.getStringExtra("title"),
+                                new TypeToken<DownloadTitle>() {
+                                }.getType());
                         JSONArray selection = new JSONArray(intent.getStringExtra("selected"));
                         queueTitle(target, selection);
                     } catch (Exception e) {
@@ -136,7 +142,8 @@ public class Downloader extends Service {
                     dt.cancel(true);
                     break;
                 case ACTION_UPDATE:
-                    if (dt == null) dt = new downloadTitle();
+                    if (dt == null)
+                        dt = new downloadTitle();
                     String url = intent.getStringExtra("url");
                     update(url);
                     break;
@@ -157,35 +164,35 @@ public class Downloader extends Service {
         return null;
     }
 
-    public void queueTitle(DownloadTitle title, JSONArray selection){
+    public void queueTitle(DownloadTitle title, JSONArray selection) {
         titles.add(title);
         selected.add(selection);
         updateNotification("");
-        if(dt.getStatus() == AsyncTask.Status.PENDING || dt.getStatus() == AsyncTask.Status.FINISHED) {
+        if (dt.getStatus() == AsyncTask.Status.PENDING || dt.getStatus() == AsyncTask.Status.FINISHED) {
             dt = new downloadTitle();
             dt.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }else{
+        } else {
             running = true;
         }
     }
 
-    public void update(String url){
-        //saves to android default download dir
-        if(d==null) d = new Download();
-        if(d.getStatus() == AsyncTask.Status.PENDING || d.getStatus() == AsyncTask.Status.FINISHED) {
+    public void update(String url) {
+        // saves to android default download dir
+        if (d == null)
+            d = new Download();
+        if (d.getStatus() == AsyncTask.Status.PENDING || d.getStatus() == AsyncTask.Status.FINISHED) {
             d = new Download();
             d.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url);
-        }else{
+        } else {
             updateDownloading = true;
             Toast.makeText(serviceContext, "이미 다운로드 중 입니다.", Toast.LENGTH_SHORT).show();
         }
     }
 
-
-
-    private class Download extends AsyncTask<String,Integer,Integer> {
+    private class Download extends AsyncTask<String, Integer, Integer> {
         File downloaded;
         int prevProgress = 0;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -200,17 +207,18 @@ public class Downloader extends Service {
                 noti.setSmallIcon(R.drawable.ic_logo);
             else
                 noti.setSmallIcon(R.drawable.notification_logo);
-            notificationManager.notify(nid+3, noti.build());
+            notificationManager.notify(nid + 3, noti.build());
         }
 
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            if(values[0] > 99) {
+            if (values[0] > 99) {
                 notificationManager.cancel(nid + 3);
-            }else {
+            } else {
                 Intent intent = new Intent(serviceContext, MainActivity.class);
-                PendingIntent intentP = PendingIntent.getActivity(serviceContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                PendingIntent intentP = PendingIntent.getActivity(serviceContext, 0, intent,
+                        PendingIntent.FLAG_IMMUTABLE);
                 NotificationCompat.Builder noti = new NotificationCompat.Builder(serviceContext, channeld)
                         .setContentIntent(intentP)
                         .setContentTitle("업데이트 다운로드중")
@@ -224,14 +232,14 @@ public class Downloader extends Service {
             }
         }
 
-
         @Override
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
-            downloaded.setReadable(true,false);
+            downloaded.setReadable(true, false);
             Uri fileUri = Uri.fromFile(downloaded);
             if (Build.VERSION.SDK_INT >= 24) {
-                fileUri = FileProvider.getUriForFile(serviceContext, serviceContext.getPackageName()+".provider", downloaded);
+                fileUri = FileProvider.getUriForFile(serviceContext, serviceContext.getPackageName() + ".provider",
+                        downloaded);
             }
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(fileUri, "application/vnd.android.package-archive");
@@ -239,7 +247,7 @@ public class Downloader extends Service {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             PendingIntent installP = PendingIntent.getActivity(serviceContext, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-            NotificationCompat.Builder  noti = new NotificationCompat.Builder(serviceContext, channeld)
+            NotificationCompat.Builder noti = new NotificationCompat.Builder(serviceContext, channeld)
                     .setContentIntent(installP)
                     .setContentTitle("업데이트 다운로드 완료")
                     .setContentText("지금 설치하려면 터치")
@@ -248,94 +256,99 @@ public class Downloader extends Service {
                 noti.setSmallIcon(R.drawable.ic_logo);
             else
                 noti.setSmallIcon(R.drawable.notification_logo);
-            notificationManager.notify(nid+4, noti.build());
+            notificationManager.notify(nid + 4, noti.build());
             updateDownloading = false;
-            if(!running) stopSelf();
+            if (!running)
+                stopSelf();
         }
 
         @Override
 
         protected Integer doInBackground(String... urls) {
             String url = urls[0];
-            downloaded = downloadFile(url, new File(serviceContext.getExternalFilesDir(null).getAbsolutePath(), "mangaview-update"), progress -> {
-                if(progress>prevProgress) {
-                    prevProgress = progress;
-                    publishProgress(progress);
-                }
-            });
+            downloaded = downloadFile(url,
+                    new File(serviceContext.getExternalFilesDir(null).getAbsolutePath(), "mangaview-update"),
+                    progress -> {
+                        if (progress > prevProgress) {
+                            prevProgress = progress;
+                            publishProgress(progress);
+                        }
+                    });
             return null;
         }
 
         Uri getFileUri(Context context, File file) {
             return FileProvider.getUriForFile(context,
-                    context.getPackageName() + "."
-                    , file);
+                    context.getPackageName() + ".", file);
         }
     }
 
-    private class downloadTitle extends AsyncTask<Void,Void,Integer> {
+    private class downloadTitle extends AsyncTask<Void, Void, Integer> {
         protected void onPreExecute() {
             super.onPreExecute();
             cookies = new HashMap<>();
             running = true;
         }
+
         protected Integer doInBackground(Void... params) {
             File home = null;
             DocumentFile homed = null;
-            try{
-                if(Build.VERSION.SDK_INT >= CODE_SCOPED_STORAGE){
+            try {
+                if (Build.VERSION.SDK_INT >= CODE_SCOPED_STORAGE) {
                     homed = DocumentFile.fromTreeUri(serviceContext, Uri.parse(homeDir));
-                    if(homed == null){
+                    if (homed == null) {
                         this.cancel(true);
                         return 1;
                     }
                 } else {
                     home = new File(homeDir);
-                    if(!home.exists()) {
+                    if (!home.exists()) {
                         this.cancel(true);
                         return 1;
                     }
                 }
-            }catch (Exception e){
-                //home folder not set
+            } catch (Exception e) {
+                // home folder not set
                 this.cancel(true);
                 return 4;
             }
             try {
                 while (titles.size() > 0) {
-                    //reset progress
+                    // reset progress
                     progress = 0;
 
-                    //mget item from queue
+                    // mget item from queue
                     DownloadTitle title = titles.get(0);
                     JSONArray selectedEps = selected.get(0);
 
                     notiTitle = title.getName();
                     updateNotification("준비중");
 
-                    //if (title.getEps() == null) title.fetchEps(httpClient);
+                    // if (title.getEps() == null) title.fetchEps(httpClient);
                     List<Manga> mangas = title.getEps();
-                    //todo: minimize eps object(remove 'mode')
+                    // todo: minimize eps object(remove 'mode')
 
                     float stepSize = maxProgress / selectedEps.length();
-                    for (int queueIndex = selectedEps.length()-1; queueIndex >= 0; queueIndex--) {
-                        if (isCancelled()) return 0;
+                    for (int queueIndex = selectedEps.length() - 1; queueIndex >= 0; queueIndex--) {
+                        if (isCancelled())
+                            return 0;
 
                         if (Build.VERSION.SDK_INT >= CODE_SCOPED_STORAGE) {
-                            //scoped storage
+                            // scoped storage
                             DocumentFile titleDir = homed.findFile(filterFolder(title.getName()));
-                            if(titleDir == null) titleDir = homed.createDirectory(filterFolder(title.getName()));
+                            if (titleDir == null)
+                                titleDir = homed.createDirectory(filterFolder(title.getName()));
 
-                            //if first manga, save title data
+                            // if first manga, save title data
                             if (queueIndex == selectedEps.length() - 1) {
                                 try {
-                                    //save thumbnail
+                                    // save thumbnail
                                     DocumentFile thumb = downloadFile(title.getThumb(), titleDir, "thumb", null);
                                     title.setThumb(thumb.getName());
 
-                                    //save the whole title as gson
+                                    // save the whole title as gson
                                     DocumentFile dataf = titleDir.findFile("title.gson");
-                                    if(dataf != null)
+                                    if (dataf != null)
                                         dataf.delete();
                                     Uri data = titleDir.createFile("application", "title.gson").getUri();
 
@@ -348,7 +361,7 @@ public class Downloader extends Service {
                                 }
                             }
 
-                            //mget index from JSONArray
+                            // mget index from JSONArray
                             int listIndex = 0;
                             try {
                                 listIndex = selectedEps.getInt(queueIndex);
@@ -358,7 +371,7 @@ public class Downloader extends Service {
                             }
 
                             Manga target = mangas.get(listIndex);
-                            //error
+                            // error
                             int cf_tries = 3;
                             while (cf_tries > 0) {
                                 target.fetch(httpClient, cookies);
@@ -369,35 +382,38 @@ public class Downloader extends Service {
                             Decoder d = new Decoder(target.getSeed(), target.getId());
                             List<String> urls = target.getImgs(getApplicationContext());
 
-                            //set stepsize
+                            // set stepsize
                             float imgStepSize = stepSize / urls.size();
 
-                            //create dir for manga
+                            // create dir for manga
                             int realIndex = mangas.size() - mangas.indexOf(target);
-                            String name = filterFolder(new DecimalFormat("0000").format(realIndex) + "." + target.getName()) + "." + target.getId();
+                            String name = filterFolder(
+                                    new DecimalFormat("0000").format(realIndex) + "." + target.getName()) + "."
+                                    + target.getId();
                             DocumentFile dir = titleDir.findFile(name);
-                            if(dir != null)
+                            if (dir != null)
                                 dir.delete();
                             dir = titleDir.createDirectory(name);
 
-                            //create download flag
+                            // create download flag
                             DocumentFile downloadFlag = dir.findFile("downloading");
-                            if(downloadFlag != null)
+                            if (downloadFlag != null)
                                 downloadFlag.delete();
                             downloadFlag = dir.createFile("application", "downloading");
 
-                            //download images
+                            // download images
                             for (int i = 0; i < urls.size(); i++) {
                                 int tries = 0;
                                 while (tries < 5) {
                                     // retry for 5 cycles
-                                    if (isCancelled()) return 0;
+                                    if (isCancelled())
+                                        return 0;
                                     String url = urls.get(i);
 
                                     if (!downloadImage(url, dir, new DecimalFormat("0000").format(i), d)) {
-                                        //change image server name and retry
+                                        // change image server name and retry
                                         tries++;
-                                    } else //else : success
+                                    } else // else : success
                                         break;
                                 }
                                 progress += imgStepSize;
@@ -409,24 +425,27 @@ public class Downloader extends Service {
 
                             downloadFlag.delete();
 
-                        }else {
+                        } else {
 
-                            //create dir for title
+                            // create dir for title
                             File titleDir = new File(homeDir, filterFolder(title.getName()));
-                            if (!titleDir.exists()) titleDir.mkdirs();
+                            if (!titleDir.exists())
+                                titleDir.mkdirs();
 
-                            //if first manga, save title data
+                            // if first manga, save title data
                             if (queueIndex == selectedEps.length() - 1) {
                                 try {
-                                    //save thumbnail
-                                    String thumb = downloadFile(title.getThumb(), new File(titleDir, "thumb")).getName();
+                                    // save thumbnail
+                                    String thumb = downloadFile(title.getThumb(), new File(titleDir, "thumb"))
+                                            .getName();
                                     title.setThumb(thumb);
 
-                                    //if old title.data exist, remove file
+                                    // if old title.data exist, remove file
                                     File old = new File(titleDir, "title.data");
-                                    if (old.exists()) old.delete();
+                                    if (old.exists())
+                                        old.delete();
 
-                                    //save the whole title as gson
+                                    // save the whole title as gson
                                     File summary = new File(titleDir, "title.gson");
                                     summary.createNewFile();
 
@@ -439,7 +458,7 @@ public class Downloader extends Service {
                                 }
                             }
 
-                            //mget index from JSONArray
+                            // mget index from JSONArray
                             int listIndex = 0;
                             try {
                                 listIndex = selectedEps.getInt(queueIndex);
@@ -449,7 +468,7 @@ public class Downloader extends Service {
                             }
 
                             Manga target = mangas.get(listIndex);
-                            //error
+                            // error
                             int cf_tries = 3;
                             while (cf_tries > 0) {
                                 target.fetch(httpClient, cookies);
@@ -459,29 +478,33 @@ public class Downloader extends Service {
                             Decoder d = new Decoder(target.getSeed(), target.getId());
                             List<String> urls = target.getImgs(getApplicationContext());
 
-                            //set stepsize
+                            // set stepsize
                             float imgStepSize = stepSize / urls.size();
 
-                            //create dir for manga
+                            // create dir for manga
                             int realIndex = mangas.size() - mangas.indexOf(target);
-                            File dir = new File(titleDir, filterFolder(new DecimalFormat("0000").format(realIndex) + "." + target.getName()) + "." + target.getId());
-                            if (!dir.exists()) dir.mkdirs();
+                            File dir = new File(titleDir,
+                                    filterFolder(new DecimalFormat("0000").format(realIndex) + "." + target.getName())
+                                            + "." + target.getId());
+                            if (!dir.exists())
+                                dir.mkdirs();
 
-                            //create download flag
+                            // create download flag
                             File downloadFlag = new File(dir, "downloading");
                             downloadFlag.createNewFile();
-                            //download images
+                            // download images
                             for (int i = 0; i < urls.size(); i++) {
                                 int tries = 0;
                                 while (tries < 5) {
                                     // retry for 5 cycles
-                                    if (isCancelled()) return 0;
+                                    if (isCancelled())
+                                        return 0;
                                     String url = urls.get(i);
 
                                     if (!downloadImage(url, new File(dir, new DecimalFormat("0000").format(i)), d)) {
-                                        //change image server name and retry
+                                        // change image server name and retry
                                         tries++;
-                                    } else //else : success
+                                    } else // else : success
                                         break;
                                 }
                                 progress += imgStepSize;
@@ -497,8 +520,8 @@ public class Downloader extends Service {
                     titles.remove(0);
                     selected.remove(0);
                 }
-            }catch (Exception e){
-                //unexpected exception
+            } catch (Exception e) {
+                // unexpected exception
                 e.printStackTrace();
                 this.cancel(true);
                 return 3;
@@ -511,7 +534,8 @@ public class Downloader extends Service {
             super.onPostExecute(res);
             endNotification();
             running = false;
-            if(!updateDownloading) stopSelf();
+            if (!updateDownloading)
+                stopSelf();
             sendBroadcast(new Intent().setAction(ACTION_STOP));
         }
 
@@ -520,7 +544,7 @@ public class Downloader extends Service {
             super.onCancelled();
             running = false;
             String why = "";
-            switch(mode){
+            switch (mode) {
                 case 0:
                     why = "유저 취소";
                     break;
@@ -539,7 +563,8 @@ public class Downloader extends Service {
             }
             notificationManager.cancel(nid);
             stopNotification(why);
-            if(!updateDownloading) stopSelf();
+            if (!updateDownloading)
+                stopSelf();
             sendBroadcast(new Intent().setAction(BROADCAST_STOP));
         }
     }
@@ -566,33 +591,34 @@ public class Downloader extends Service {
                     return false;
                 }
             }
-            //String fileType = url.toString().substring(url.toString().lastIndexOf('.') + 1);
+            // String fileType = url.toString().substring(url.toString().lastIndexOf('.') +
+            // 1);
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("Referer", p.getUrl());
 
-
             // manatoki gives image files as document
-//            String type = connection.getHeaderField("Content-Type");
-//
-//            if(!type.startsWith("image/")) {
-//                //following file is not image
-//                return false;
-//            }
+            // String type = connection.getHeaderField("Content-Type");
+            //
+            // if(!type.startsWith("image/")) {
+            // //following file is not image
+            // return false;
+            // }
 
-            //load image as bitmap
+            // load image as bitmap
             InputStream in = connection.getInputStream();
             Bitmap bitmap = BitmapFactory.decodeStream(in);
-            //decode image
+            // decode image
             bitmap = d.decode(bitmap);
-            //save image
+            // save image
             OutputStream outputStream = new FileOutputStream(outputFile.getAbsolutePath() + ".jpg");
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream); // saving the Bitmap to a file compressed as
+                                                                           // a JPEG with 85% compression rate
             in.close();
             outputStream.flush(); // Not really required
             outputStream.close(); // do not forget to close the stream
         } catch (Exception e) {
             e.printStackTrace();
-            //retry if old image server
+            // retry if old image server
             return false;
         }
         return true;
@@ -621,29 +647,32 @@ public class Downloader extends Service {
                     return false;
                 }
             }
-            //String fileType = url.toString().substring(url.toString().lastIndexOf('.') + 1);
+            // String fileType = url.toString().substring(url.toString().lastIndexOf('.') +
+            // 1);
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("Referer", p.getUrl());
 
-            //load image as bitmap
+            // load image as bitmap
             InputStream in = connection.getInputStream();
             Bitmap bitmap = BitmapFactory.decodeStream(in);
-            //decode image
+            // decode image
             bitmap = d.decode(bitmap);
-            //save image
-            String fname = name +".jpg";
+            // save image
+            String fname = name + ".jpg";
             DocumentFile outputFile = parent.findFile(fname);
-            if(outputFile != null) outputFile.delete();
-            outputFile = parent.createFile("image/jpeg",fname);
+            if (outputFile != null)
+                outputFile.delete();
+            outputFile = parent.createFile("image/jpeg", fname);
 
             OutputStream outputStream = serviceContext.getContentResolver().openOutputStream(outputFile.getUri());
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream); // saving the Bitmap to a file compressed as
+                                                                           // a JPEG with 85% compression rate
             in.close();
             outputStream.flush(); // Not really required
             outputStream.close(); // do not forget to close the stream
         } catch (Exception e) {
             e.printStackTrace();
-            //retry if old image server
+            // retry if old image server
             return false;
         }
         return true;
@@ -652,19 +681,20 @@ public class Downloader extends Service {
     File downloadFile(String urlStr, File outputFile) {
         return downloadFile(urlStr, outputFile, null);
     }
-    File downloadFile(String urlStr, File outputFile, ProgressInterface publisher){
-        //returns file name with extension
+
+    File downloadFile(String urlStr, File outputFile, ProgressInterface publisher) {
+        // returns file name with extension
         String name = "";
         int filesize;
         try {
             URL url = new URL(urlStr);
-            if(url.getProtocol().toLowerCase().equals("https")) {
+            if (url.getProtocol().toLowerCase().equals("https")) {
                 HttpsURLConnection init = (HttpsURLConnection) url.openConnection();
                 int responseCode = init.getResponseCode();
                 if (responseCode >= 300) {
                     url = new URL(init.getHeaderField("location"));
                 }
-            }else{
+            } else {
                 HttpURLConnection init = (HttpURLConnection) url.openConnection();
                 int responseCode = init.getResponseCode();
                 if (responseCode >= 300) {
@@ -675,19 +705,20 @@ public class Downloader extends Service {
             URLConnection connection = url.openConnection();
             filesize = connection.getContentLength();
 
-            //load file
+            // load file
             InputStream in = connection.getInputStream();
-            outputFile = new File(outputFile.getAbsolutePath()+'.'+fileType);
+            outputFile = new File(outputFile.getAbsolutePath() + '.' + fileType);
             name = outputFile.getName();
             OutputStream outputStream = new FileOutputStream(outputFile);
-            //save file
+            // save file
             byte[] buf = new byte[1024];
             int len = 0;
             int cursize = 0;
-            while ((len = in.read(buf)) > 0){
+            while ((len = in.read(buf)) > 0) {
                 outputStream.write(buf, 0, len);
                 cursize += len;
-                if(publisher!=null) publisher.publish((int)(((double)cursize/(double)filesize)*100d));
+                if (publisher != null)
+                    publisher.publish((int) (((double) cursize / (double) filesize) * 100d));
             }
             in.close();
             outputStream.flush(); // Not really required
@@ -699,19 +730,19 @@ public class Downloader extends Service {
         return outputFile;
     }
 
-    DocumentFile downloadFile(String urlStr, DocumentFile parent, String name, ProgressInterface publisher){
-        //returns file name with extension
+    DocumentFile downloadFile(String urlStr, DocumentFile parent, String name, ProgressInterface publisher) {
+        // returns file name with extension
         DocumentFile outputFile = null;
         int filesize;
         try {
             URL url = new URL(urlStr);
-            if(url.getProtocol().toLowerCase().equals("https")) {
+            if (url.getProtocol().toLowerCase().equals("https")) {
                 HttpsURLConnection init = (HttpsURLConnection) url.openConnection();
                 int responseCode = init.getResponseCode();
                 if (responseCode >= 300) {
                     url = new URL(init.getHeaderField("location"));
                 }
-            }else{
+            } else {
                 HttpURLConnection init = (HttpURLConnection) url.openConnection();
                 int responseCode = init.getResponseCode();
                 if (responseCode >= 300) {
@@ -722,23 +753,24 @@ public class Downloader extends Service {
             URLConnection connection = url.openConnection();
             filesize = connection.getContentLength();
 
-            //load file
+            // load file
             InputStream in = connection.getInputStream();
-            //create file
-            DocumentFile pfile = parent.findFile(name+'.'+fileType);
-            if(pfile != null)
+            // create file
+            DocumentFile pfile = parent.findFile(name + '.' + fileType);
+            if (pfile != null)
                 pfile.delete();
-            outputFile = parent.createFile("image", name+"."+fileType);
-            //open stream
+            outputFile = parent.createFile("image", name + "." + fileType);
+            // open stream
             OutputStream outputStream = serviceContext.getContentResolver().openOutputStream(outputFile.getUri());
-            //save file
+            // save file
             byte[] buf = new byte[1024];
             int len = 0;
             int cursize = 0;
-            while ((len = in.read(buf)) > 0){
+            while ((len = in.read(buf)) > 0) {
                 outputStream.write(buf, 0, len);
                 cursize += len;
-                if(publisher!=null) publisher.publish((int)(((double)cursize/(double)filesize)*100d));
+                if (publisher != null)
+                    publisher.publish((int) (((double) cursize / (double) filesize) * 100d));
             }
             in.close();
             outputStream.flush(); // Not really required
@@ -750,14 +782,15 @@ public class Downloader extends Service {
         return outputFile;
     }
 
-    public int getIndex(List<Manga> eps, int id){
-        for(int i=0; i<eps.size(); i++){
-            if(eps.get(i).getId()==id){
-                return eps.size()-i;
+    public int getIndex(List<Manga> eps, int id) {
+        for (int i = 0; i < eps.size(); i++) {
+            if (eps.get(i).getId() == id) {
+                return eps.size() - i;
             }
         }
         return 0;
     }
+
     private void startNotification() {
         notification = new NotificationCompat.Builder(this, channeld)
                 .setContentIntent(pendingIntent)
@@ -769,6 +802,7 @@ public class Downloader extends Service {
             notification.setSmallIcon(R.drawable.notification_logo);
         startForeground(nid, notification.build());
     }
+
     private void updateNotification(String text) {
         notification = new NotificationCompat.Builder(this, channeld)
                 .setContentIntent(pendingIntent)
@@ -785,7 +819,7 @@ public class Downloader extends Service {
         notificationManager.notify(nid, notification.build());
     }
 
-    private void endNotification(){
+    private void endNotification() {
         notification = new NotificationCompat.Builder(this, channeld)
                 .setContentIntent(pendingIntent)
                 .setContentTitle("다운로드 완료")
@@ -795,9 +829,9 @@ public class Downloader extends Service {
         else
             notification.setSmallIcon(R.drawable.notification_logo);
         notificationManager.notify(nid, notification.build());
-}
+    }
 
-    private void finishNotification(){
+    private void finishNotification() {
         notification = new NotificationCompat.Builder(this, channeld)
                 .setContentIntent(pendingIntent)
                 .setContentTitle("모든 다운로드가 완료되었습니다.")
@@ -806,13 +840,14 @@ public class Downloader extends Service {
             notification.setSmallIcon(R.drawable.ic_logo);
         else
             notification.setSmallIcon(R.drawable.notification_logo);
-        if(failures>0) {
+        if (failures > 0) {
             notification.setContentText("누락: " + failures);
             failures = 0;
         }
-        notificationManager.notify(nid+1, notification.build());
+        notificationManager.notify(nid + 1, notification.build());
     }
-    private void stopNotification(String why){
+
+    private void stopNotification(String why) {
         notification = new NotificationCompat.Builder(this, channeld)
                 .setContentIntent(pendingIntent)
                 .setContentText(why)
@@ -825,9 +860,8 @@ public class Downloader extends Service {
         notificationManager.notify(nid + 2, notification.build());
     }
 
-    private interface ProgressInterface{
+    private interface ProgressInterface {
         void publish(int progress);
     }
-
 
 }

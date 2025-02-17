@@ -46,23 +46,25 @@ public class DebugActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
-        Button pref =this.findViewById(R.id.debug_pref);
+        Button pref = this.findViewById(R.id.debug_pref);
         output = this.findViewById(R.id.debug_out);
         context = this;
 
         this.findViewById(R.id.debug_file_test).setOnClickListener(view -> {
             Uri uri = Uri.parse(p.getHomeDir());
-            output.append("current home dir : "+p.getHomeDir()+"\n\n");
+            output.append("current home dir : " + p.getHomeDir() + "\n\n");
             try {
                 DocumentFile t = DocumentFile.fromTreeUri(context, uri);
-                output.append("path : " + t.getUri() + "\ncan read : " + t.canRead() + "\ncan write : " + t.canWrite()+"\n");
-            }catch (Exception e){
-                if(e.getMessage() != null)
-                    output.append(e.getMessage()+"\n");
+                output.append("path : " + t.getUri() + "\ncan read : " + t.canRead() + "\ncan write : " + t.canWrite()
+                        + "\n");
+            } catch (Exception e) {
+                if (e.getMessage() != null)
+                    output.append(e.getMessage() + "\n");
             }
         });
 
-        this.findViewById(R.id.debug_webTest).setOnClickListener(v -> startActivity(new Intent(context, CaptchaActivity.class)));
+        this.findViewById(R.id.debug_webTest)
+                .setOnClickListener(v -> startActivity(new Intent(context, CaptchaActivity.class)));
         scroll = this.findViewById(R.id.debug_scroll);
         pref.setOnClickListener(v -> output.setText(readPref(context)));
 
@@ -78,7 +80,7 @@ public class DebugActivity extends AppCompatActivity {
             cancel.setVisibility(View.VISIBLE);
             editor.setText(readPref(context));
             save.setOnClickListener(v12 -> {
-                //save changes
+                // save changes
                 writeToPref(editor.getText());
                 new Preference(context).init(context);
                 editor.setVisibility(View.GONE);
@@ -87,7 +89,7 @@ public class DebugActivity extends AppCompatActivity {
                 editor.setText("");
             });
             cancel.setOnClickListener(v1 -> {
-                //discard
+                // discard
                 editor.setVisibility(View.GONE);
                 save.setVisibility(View.GONE);
                 cancel.setVisibility(View.GONE);
@@ -95,52 +97,54 @@ public class DebugActivity extends AppCompatActivity {
             });
         });
 
-        this.findViewById(R.id.debug_eula).setOnClickListener(view -> startActivity(new Intent(context, FirstTimeActivity.class)));
+        this.findViewById(R.id.debug_eula)
+                .setOnClickListener(view -> startActivity(new Intent(context, FirstTimeActivity.class)));
 
+        this.findViewById(R.id.debug_loginTest)
+                .setOnClickListener(view -> startActivity(new Intent(context, LoginActivity.class)));
 
-
-        this.findViewById(R.id.debug_loginTest).setOnClickListener(view -> startActivity(new Intent(context, LoginActivity.class)));
-
-        this.findViewById(R.id.debug_layoutEditor).setOnClickListener(view -> startActivity(new Intent(context, LayoutEditActivity.class)));
+        this.findViewById(R.id.debug_layoutEditor)
+                .setOnClickListener(view -> startActivity(new Intent(context, LayoutEditActivity.class)));
 
         this.findViewById(R.id.debug_baseMode).setOnClickListener(view -> {
-            if(p.getBaseMode() == base_comic) {
+            if (p.getBaseMode() == base_comic) {
                 p.setBaseMode(base_webtoon);
                 Toast.makeText(context, "webtoon", Toast.LENGTH_SHORT).show();
-            }else {
+            } else {
                 p.setBaseMode(base_comic);
                 Toast.makeText(context, "comic", Toast.LENGTH_SHORT).show();
             }
         });
 
         this.findViewById(R.id.debug_idInput).setOnClickListener(v -> {
-            //show popup
+            // show popup
             showIntegerInputPopup(context, "input manga id", i -> {
                 Intent viewer = viewerIntent(context, new Manga(i, "", "", base_auto));
                 viewer.putExtra("online", true);
                 ((Activity) context).startActivity(viewer);
-            },false);
+            }, false);
         });
 
     }
 
-    void writeToPref(Editable edit){
+    void writeToPref(Editable edit) {
         try {
             SharedPreferences sharedPref = this.getSharedPreferences("mangaView", Context.MODE_PRIVATE);
             CustomJSONObject data = new CustomJSONObject(edit.toString());
             Utils.jsonToPref(this, data);
             // reload preference
             p.init(this);
-        }catch (Exception e){
-            showPopup(context,"오류",e.getMessage());
+        } catch (Exception e) {
+            showPopup(context, "오류", e.getMessage());
             e.printStackTrace();
         }
     }
 
-//    String filter(String input){return input.replaceAll("(?<!\\\\)\\\\(?!\\\\)", "");}
+    // String filter(String input){return input.replaceAll("(?<!\\\\)\\\\(?!\\\\)",
+    // "");}
 
-    private void printLine(String text){
-        output.append(System.currentTimeMillis() + " : " +text + "\n");
+    private void printLine(String text) {
+        output.append(System.currentTimeMillis() + " : " + text + "\n");
     }
 
     @Override
@@ -154,11 +158,10 @@ public class DebugActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.debug_up) {
             scroll.fullScroll(View.FOCUS_UP);
-        }else if (id == R.id.debug_down){
+        } else if (id == R.id.debug_down) {
             scroll.fullScroll(View.FOCUS_DOWN);
         }
         return super.onOptionsItemSelected(item);
     }
-
 
 }

@@ -54,8 +54,9 @@ public class Migrator extends Service {
         running = true;
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26) {
-            //notificationManager.deleteNotificationChannel("mangaView");
-            NotificationChannel mchannel = new NotificationChannel(channeld, "MangaView", NotificationManager.IMPORTANCE_LOW);
+            // notificationManager.deleteNotificationChannel("mangaView");
+            NotificationChannel mchannel = new NotificationChannel(channeld, "MangaView",
+                    NotificationManager.IMPORTANCE_LOW);
             mchannel.setDescription("데이터 업데이트");
             mchannel.enableLights(true);
             mchannel.setLightColor(Color.MAGENTA);
@@ -74,18 +75,19 @@ public class Migrator extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         running = true;
-        if(intent!=null){
+        if (intent != null) {
             switch (intent.getAction()) {
                 case MIGRATE_START:
                     startNotification();
-                    if (mw == null) mw = new MigrationWorker();
+                    if (mw == null)
+                        mw = new MigrationWorker();
                     mw.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     break;
                 case MIGRATE_STOP:
                     //
                     break;
                 case MIGRATE_PROGRESS:
-                    if(mw != null){
+                    if (mw != null) {
                         mw.onProgressUpdate("...");
                     }
                     break;
@@ -93,7 +95,6 @@ public class Migrator extends Service {
         }
         return START_STICKY;
     }
-
 
     @Override
     public void onDestroy() {
@@ -121,8 +122,7 @@ public class Migrator extends Service {
         startForeground(nid, notification.build());
     }
 
-
-    private void endNotification(){
+    private void endNotification() {
         PendingIntent resultPendingIntent = PendingIntent.getActivity(serviceContext, 0, resultIntent, 0);
         notification = new NotificationCompat.Builder(this, channeld)
                 .setContentIntent(resultPendingIntent)
@@ -136,14 +136,14 @@ public class Migrator extends Service {
         notificationManager.notify(nid, notification.build());
     }
 
-    private void sendBroadcast(String action){
+    private void sendBroadcast(String action) {
         sendBroadcast(action, null);
     }
 
-    private void sendBroadcast(String action, String msg){
+    private void sendBroadcast(String action, String msg) {
         Intent intent = new Intent();
         intent.setAction(action);
-        if(msg!=null && msg.length()>0)
+        if (msg != null && msg.length() > 0)
             intent.putExtra("msg", msg);
         sendBroadcast(intent);
     }
@@ -161,11 +161,11 @@ public class Migrator extends Service {
             startNotification();
         }
 
-
         @Override
         protected void onProgressUpdate(String... values) {
-            String msg = current +" / " + sum+"\n앱을 종료하지 말아주세요.\n";
-            if(values !=null && values.length>0) msg += values[0];
+            String msg = current + " / " + sum + "\n앱을 종료하지 말아주세요.\n";
+            if (values != null && values.length > 0)
+                msg += values[0];
             sendBroadcast(MIGRATE_PROGRESS, msg);
         }
 
@@ -173,14 +173,14 @@ public class Migrator extends Service {
         protected Integer doInBackground(Void... voids) {
             // check domain
             MainPage mp = new MainPage(httpClient);
-            if(mp.getRecent().size()<1)
+            if (mp.getRecent().size() < 1)
                 return 1;
 
             List<MTitle> recents = p.getRecent();
             sum += recents.size();
             List<MTitle> favorites = p.getFavorite();
             sum += favorites.size();
-            //recent data
+            // recent data
 
             removeDups(favorites);
             removeDups(recents);
@@ -189,30 +189,30 @@ public class Migrator extends Service {
             newFavorites = new ArrayList<>();
             failed = new ArrayList<>();
 
-            for(int i=0; i<recents.size(); i++){
+            for (int i = 0; i < recents.size(); i++) {
                 try {
                     current++;
                     MTitle newTitle = findTitle(recents.get(i));
                     publishProgress(newTitle.getName());
-                    if(newTitle !=null)
+                    if (newTitle != null)
                         newRecents.add(newTitle);
                     else
                         failed.add(recents.get(i).getName());
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                     failed.add(recents.get(i).getName());
                 }
             }
-            for(int i=0; i<favorites.size(); i++){
+            for (int i = 0; i < favorites.size(); i++) {
                 try {
                     current++;
                     MTitle newTitle = findTitle(favorites.get(i));
                     publishProgress(newTitle.getName());
-                    if(newTitle !=null)
+                    if (newTitle != null)
                         newFavorites.add(newTitle);
                     else
                         failed.add(favorites.get(i).getName());
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                     failed.add(favorites.get(i).getName());
                 }
@@ -221,18 +221,18 @@ public class Migrator extends Service {
             p.setFavorites(newFavorites);
             p.setRecents(newRecents);
 
-            //remove bookmarks
+            // remove bookmarks
             p.resetViewerBookmark();
             p.resetBookmark();
 
             return 0;
         }
 
-        void removeDups(List<MTitle> titles){
-            for(int i=0; i<titles.size(); i++){
+        void removeDups(List<MTitle> titles) {
+            for (int i = 0; i < titles.size(); i++) {
                 MTitle target = titles.get(i);
-                for(int j =0 ; j<titles.size(); j++){
-                    if(j!=i && titles.get(j).getId() == target.getId()){
+                for (int j = 0; j < titles.size(); j++) {
+                    if (j != i && titles.get(j).getId() == target.getId()) {
                         titles.remove(i);
                         i--;
                         break;
@@ -241,17 +241,17 @@ public class Migrator extends Service {
             }
         }
 
-        MTitle findTitle(String title){
-            return findTitle(new MTitle(title,-1,"", "",new ArrayList<>(),"", base_comic));
+        MTitle findTitle(String title) {
+            return findTitle(new MTitle(title, -1, "", "", new ArrayList<>(), "", base_comic));
         }
 
-        MTitle findTitle(MTitle title){
+        MTitle findTitle(MTitle title) {
             String name = title.getName();
-            Search s = new Search(name,0, base_comic);
-            while(!s.isLast()){
+            Search s = new Search(name, 0, base_comic);
+            while (!s.isLast()) {
                 s.fetch(httpClient);
-                for(Title t : s.getResult()){
-                    if(t.getName().equals(name)){
+                for (Title t : s.getResult()) {
+                    if (t.getName().equals(name)) {
                         return t.minimize();
                     }
                 }
@@ -261,20 +261,19 @@ public class Migrator extends Service {
 
         @Override
         protected void onPostExecute(Integer resCode) {
-            if(resCode == 0){
+            if (resCode == 0) {
                 StringBuilder builder = new StringBuilder();
                 builder.append("기록 업데이트 완료.\n실패한 항목: ");
                 builder.append(failed.size());
                 builder.append("개\n");
-                for(String t : failed){
+                for (String t : failed) {
                     builder.append("\n").append(t);
                 }
                 resultIntent.setAction(MIGRATE_RESULT);
-                resultIntent.putExtra("msg",builder.toString());
+                resultIntent.putExtra("msg", builder.toString());
                 endNotification();
                 sendBroadcast(MIGRATE_SUCCESS, builder.toString());
-            }
-            else if(resCode == 1) {
+            } else if (resCode == 1) {
                 endNotification();
                 sendBroadcast(MIGRATE_FAIL, "연결 오류 : 연결을 확인하고 다시 시도해 주세요.");
             }
@@ -284,9 +283,8 @@ public class Migrator extends Service {
 
         @Override
         protected void onCancelled() {
-            //todo?
+            // todo?
         }
     }
-
 
 }

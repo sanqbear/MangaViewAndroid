@@ -31,21 +31,23 @@ public class ViewerPageFragment extends Fragment {
     PageInterface i;
     int width;
 
-    public ViewerPageFragment(){
+    public ViewerPageFragment() {
 
     }
-    public ViewerPageFragment(String image, Decoder decoder, int width, Context context, PageInterface i){
+
+    public ViewerPageFragment(String image, Decoder decoder, int width, Context context, PageInterface i) {
         this.image = image;
         this.decoder = decoder;
         this.width = width;
         this.context = context;
         this.i = i;
     }
-    public static Fragment create(String image, Decoder decoder, int width, Context context, PageInterface i){
+
+    public static Fragment create(String image, Decoder decoder, int width, Context context, PageInterface i) {
         return new ViewerPageFragment(image, decoder, width, context, i);
     }
 
-    public void updatePageFragment(Context context){
+    public void updatePageFragment(Context context) {
         this.context = context;
     }
 
@@ -55,15 +57,15 @@ public class ViewerPageFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_viewer, container, false);
         ImageView frame = rootView.findViewById(R.id.page);
         ImageButton refresh = rootView.findViewById(R.id.refreshButton);
-        //glide
+        // glide
         frame.setImageResource(R.drawable.placeholder);
         refresh.setVisibility(View.VISIBLE);
 
-        if(context != null)
+        if (context != null)
             loadImage(frame, refresh);
 
         refresh.setOnClickListener(v -> {
-            if(context != null) {
+            if (context != null) {
                 loadImage(frame, refresh);
             }
         });
@@ -72,7 +74,7 @@ public class ViewerPageFragment extends Fragment {
         return rootView;
     }
 
-    void loadImage(ImageView frame, ImageButton refresh){
+    void loadImage(ImageView frame, ImageButton refresh) {
         Object target = image.startsWith("http") ? getGlideUrl(image) : image;
         Glide.with(frame)
                 .asBitmap()
@@ -81,7 +83,7 @@ public class ViewerPageFragment extends Fragment {
                     @Override
                     public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
                         refresh.setVisibility(View.GONE);
-                        bitmap = decoder.decode(bitmap,width);
+                        bitmap = decoder.decode(bitmap, width);
                         frame.setImageBitmap(bitmap);
                     }
 
@@ -92,7 +94,7 @@ public class ViewerPageFragment extends Fragment {
 
                     @Override
                     public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                        if(image.length()>0) {
+                        if (image.length() > 0) {
                             frame.setImageResource(R.drawable.placeholder);
                             refresh.setVisibility(View.VISIBLE);
                         }
@@ -100,7 +102,7 @@ public class ViewerPageFragment extends Fragment {
                 });
     }
 
-    public void setOnClick(PageInterface i){
+    public void setOnClick(PageInterface i) {
         this.i = i;
     }
 }

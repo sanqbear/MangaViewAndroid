@@ -13,14 +13,12 @@ import org.acra.data.StringFormat;
 
 import ml.melun.mangaview.mangaview.CustomHttpClient;
 
-
-
 //@AcraCore(reportContent = { APP_VERSION_NAME, ANDROID_VERSION, PHONE_MODEL, STACK_TRACE, REPORT_ID})
-
 
 public class MainApplication extends MultiDexApplication {
     public static CustomHttpClient httpClient;
     public static Preference p;
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -35,8 +33,7 @@ public class MainApplication extends MultiDexApplication {
                                 .withText(getResources().getText(R.string.acra_dialog_text).toString())
                                 .withPositiveButtonText("확인")
                                 .withNegativeButtonText("취소")
-                                .build()
-                ));
+                                .build()));
     }
 
     @Override

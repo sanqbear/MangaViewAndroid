@@ -10,13 +10,13 @@ public class Bookmark {
     int page = -1;
     boolean last = false;
 
-    public Bookmark(){
+    public Bookmark() {
 
     }
 
-    public int fetch(CustomHttpClient client){
+    public int fetch(CustomHttpClient client) {
         result = new ArrayList<>();
-        //todo implement this
+        // todo implement this
         return 0;
     }
 
@@ -24,11 +24,11 @@ public class Bookmark {
         return !last;
     }
 
-    public List<MTitle> getResult(){
+    public List<MTitle> getResult() {
         return this.result;
     }
 
-    public static int importBookmark(Preference p, CustomHttpClient client){
+    public static int importBookmark(Preference p, CustomHttpClient client) {
         try {
             Bookmark b = new Bookmark();
             List<MTitle> bookmarks = new ArrayList<>();
@@ -43,7 +43,7 @@ public class Bookmark {
                 if (p.findFavorite(t) < 0)
                     p.toggleFavorite(t, 0);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return 1;
         }
         return 0;

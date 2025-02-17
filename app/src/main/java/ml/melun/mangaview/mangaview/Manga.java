@@ -29,14 +29,14 @@ import android.os.Build;
 
 import androidx.documentfile.provider.DocumentFile;
 
-    /*
-    mode:
-    0 = online
-    1 = offline - old
-    2 = offline - old(moa) (title.data)
-    3 = offline - latest(toki) (title.gson)
-    4 = offline - new(moa) (title.gson)
-     */
+/*
+mode:
+0 = online
+1 = offline - old
+2 = offline - old(moa) (title.data)
+3 = offline - latest(toki) (title.gson)
+4 = offline - new(moa) (title.gson)
+ */
 
 public class Manga {
     int baseMode = base_comic;
@@ -73,7 +73,8 @@ public class Manga {
     }
 
     public String getThumb() {
-        if (thumb == null) return "";
+        if (thumb == null)
+            return "";
         return thumb;
     }
 
@@ -94,7 +95,7 @@ public class Manga {
         int tries = 0;
 
         while (imgs.size() == 0 && tries < 2) {
-            Response r = client.mget(  baseModeStr(baseMode) + '/' + id, false, cookies);
+            Response r = client.mget(baseModeStr(baseMode) + '/' + id, false, cookies);
             try {
                 if (r.code() == 302 && r.header("location").contains("captcha.php")) {
                     return LOAD_CAPTCHA;
@@ -102,7 +103,7 @@ public class Manga {
                 String body = r.body().string();
                 r.close();
                 if (body.contains("Connect Error: Connection timed out")) {
-                    //adblock : try again
+                    // adblock : try again
                     r.close();
                     tries = 0;
                     continue;
@@ -112,10 +113,10 @@ public class Manga {
 
                 System.out.println(body);
 
-                //name
+                // name
                 name = d.selectFirst("div.toon-title").ownText();
 
-                //temp title
+                // temp title
                 Element navbar = d.selectFirst("div.toon-nav");
                 int tid = Integer.parseInt(navbar.select("a")
                         .last()
@@ -123,22 +124,24 @@ public class Manga {
                         .split(baseModeStr(baseMode) + '/')[1]
                         .split("\\?")[0]);
 
-                if (title == null) title = new Title(name, "", "", null, "", tid, baseMode);
+                if (title == null)
+                    title = new Title(name, "", "", null, "", tid, baseMode);
 
-                //eps
+                // eps
                 for (Element e : navbar.selectFirst("select").select("option")) {
                     String idstr = e.attr("value");
                     if (idstr.length() > 0)
                         eps.add(new Manga(Integer.parseInt(idstr), e.ownText(), "", baseMode));
                 }
 
-                //imgs
+                // imgs
                 String script = d.select("div.view-padding").get(1).selectFirst("script").data();
                 StringBuilder encodedData = new StringBuilder();
                 encodedData.append('%');
                 for (String line : script.split("\n")) {
                     if (line.contains("html_data+=")) {
-                        encodedData.append(line.substring(line.indexOf('\'') + 1, line.lastIndexOf('\'')).replaceAll("[.]", "%"));
+                        encodedData.append(
+                                line.substring(line.indexOf('\'') + 1, line.lastIndexOf('\'')).replaceAll("[.]", "%"));
                     }
                 }
                 if (encodedData.lastIndexOf("%") == encodedData.length() - 1)
@@ -174,9 +177,8 @@ public class Manga {
                     }
                 }
 
-                //comments
+                // comments
                 Element commentdiv = d.selectFirst("div#viewcomment");
-
 
                 try {
                     for (Element e : commentdiv.selectFirst("section#bo_vc").select("div.media")) {
@@ -220,14 +222,15 @@ public class Manga {
         String lvlstr;
         int indent;
         String indentstr;
-        //indent
+        // indent
         indentstr = e.attr("style");
         if (indentstr.length() > 0)
-            indent = Integer.parseInt(indentstr.substring(indentstr.lastIndexOf(':') + 1, indentstr.lastIndexOf('p'))) / 64;
+            indent = Integer.parseInt(indentstr.substring(indentstr.lastIndexOf(':') + 1, indentstr.lastIndexOf('p')))
+                    / 64;
         else
             indent = 0;
 
-        //icon
+        // icon
         Element icone = e.selectFirst(".media-object");
         if (icone.is("img"))
             icon = icone.attr("src");
@@ -253,7 +256,6 @@ public class Manga {
         return new Comment(user, timestamp, icon, content, indent, likes, level);
     }
 
-
     public List<Manga> getEps() {
         return eps;
     }
@@ -266,7 +268,7 @@ public class Manga {
         if (mode != 0) {
             if (imgs == null) {
                 imgs = new ArrayList<>();
-                //is offline : read image list
+                // is offline : read image list
                 if (Build.VERSION.SDK_INT >= CODE_SCOPED_STORAGE) {
                     DocumentFile[] offimgs = DocumentFile.fromTreeUri(context, Uri.parse(offlinePath)).listFiles();
                     Arrays.sort(offimgs, (documentFile, t1) -> documentFile.getName().compareTo(t1.getName()));
@@ -361,8 +363,10 @@ public class Manga {
                 return null;
             } else {
                 int index = eps.indexOf(this);
-                if (index > 0) return eps.get(index - 1);
-                else return null;
+                if (index > 0)
+                    return eps.get(index - 1);
+                else
+                    return null;
             }
         } else {
             return nextEp;
@@ -375,8 +379,10 @@ public class Manga {
                 return null;
             } else {
                 int index = eps.indexOf(this);
-                if (index < eps.size() - 1) return eps.get(index + 1);
-                else return null;
+                if (index < eps.size() - 1)
+                    return eps.get(index + 1);
+                else
+                    return null;
             }
         } else {
             return prevEp;
@@ -409,4 +415,3 @@ public class Manga {
         void setMessage(String msg);
     }
 }
-
