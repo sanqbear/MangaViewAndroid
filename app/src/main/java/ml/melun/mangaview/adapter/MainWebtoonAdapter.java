@@ -205,7 +205,8 @@ public class MainWebtoonAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             for (Ranking<?> r : dataSet) {
                 if (r == null || r.size() == 0) {
                     // captcha?
-                    listener.captchaCallback();
+                    // no. not need it.
+                    // listener.captchaCallback();
                     return;
                 }
             }
