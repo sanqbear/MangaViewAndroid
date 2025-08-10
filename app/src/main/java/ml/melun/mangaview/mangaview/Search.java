@@ -130,7 +130,7 @@ public class Search {
                     }
                 }
                 response.close();
-                if (result.size() < 35)
+                if (result.size() < 30)
                     last = true;
 
                 if (result.size() == 0)
