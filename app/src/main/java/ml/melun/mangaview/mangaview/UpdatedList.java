@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import okhttp3.Response;
+import static ml.melun.mangaview.MainApplication.p;
+import android.util.Log;
 
 public class UpdatedList {
     Boolean last = false;
@@ -46,6 +48,14 @@ public class UpdatedList {
                 for (Element item : items) {
                     try {
                         String img = item.selectFirst("img").attr("src");
+                                        // thumb의 host를 p.getUrl()의 host로 치환
+                        try {
+                            java.net.URL oldUrl = new java.net.URL(img);
+                            java.net.URL newBase = new java.net.URL(p.getUrl());
+                            img = newBase.getProtocol() + "://" + newBase.getHost() + (newBase.getPort() != -1 ? ":" + newBase.getPort() : "") + oldUrl.getPath();
+                        } catch (Exception ex) {
+                            Log.e("UpdatedList", ex.toString());
+                        }
                         String name = item.selectFirst("div.post-subject").selectFirst("a").ownText();
                         int id = Integer.parseInt(item
                                 .selectFirst("div.pull-left")

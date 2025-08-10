@@ -8,8 +8,10 @@ import org.jsoup.select.Elements;
 import java.util.ArrayList;
 import java.util.List;
 import okhttp3.Response;
+import android.util.Log;
 
 import static ml.melun.mangaview.mangaview.MTitle.base_comic;
+import static ml.melun.mangaview.MainApplication.p;
 
 public class MainPage {
     List<Manga> recent, favUpdate, onlineRecent;
@@ -54,6 +56,15 @@ public class MainPage {
                 id = Integer.parseInt(e.selectFirst("a").attr("href").split("comic/")[1]);
                 infos = e.selectFirst("div.img-item");
                 thumb = infos.selectFirst("img").attr("src");
+                // thumb의 host를 p.getUrl()의 host로 치환
+                try {
+                    java.net.URL oldUrl = new java.net.URL(thumb);
+                    java.net.URL newBase = new java.net.URL(p.getUrl());
+                    thumb = newBase.getProtocol() + "://" + newBase.getHost() + (newBase.getPort() != -1 ? ":" + newBase.getPort() : "") + oldUrl.getPath();
+                } catch (Exception ex) {
+                    Log.e("MainPage", ex.toString());
+                }
+
                 name = infos.selectFirst("b").ownText();
 
                 mtmp = new Manga(id, name, "", base_comic);
@@ -67,6 +78,14 @@ public class MainPage {
                 infos = e.selectFirst("div.img-item");
                 thumb = infos.selectFirst("img").attr("src");
                 name = infos.selectFirst("div.in-subject").ownText();
+
+                try {
+                    java.net.URL oldUrl = new java.net.URL(thumb);
+                    java.net.URL newBase = new java.net.URL(p.getUrl());
+                    thumb = newBase.getProtocol() + "://" + newBase.getHost() + (newBase.getPort() != -1 ? ":" + newBase.getPort() : "") + oldUrl.getPath();
+                } catch (Exception ex) {
+                    Log.e("MainPage", ex.toString());
+                }
 
                 ranking.add(new RankingTitle(name, thumb, "", null, "", id, base_comic, i++));
             }
@@ -82,7 +101,7 @@ public class MainPage {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("MainPage", e.toString());
         }
 
         /*
