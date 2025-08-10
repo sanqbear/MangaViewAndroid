@@ -23,17 +23,6 @@ public class MainApplication extends MultiDexApplication {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         System.out.println("main app start");
-        ACRA.init(this, new CoreConfigurationBuilder()
-                .withBuildConfigClass(BuildConfig.class)
-                .withReportFormat(StringFormat.JSON)
-                .withPluginConfigurations(
-                        new MailSenderConfigurationBuilder().withMailTo("mangaview@protonmail.com").build(),
-                        new DialogConfigurationBuilder()
-                                .withTitle("MangaView")
-                                .withText(getResources().getText(R.string.acra_dialog_text).toString())
-                                .withPositiveButtonText("확인")
-                                .withNegativeButtonText("취소")
-                                .build()));
     }
 
     @Override
